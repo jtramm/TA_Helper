@@ -54,7 +54,7 @@ WorkFlow----------------------------------------------------------------------
 	Run TA Helper to automatically email students their grade.txt files.
 	||
 	\/
-	Profit?
+	Enjoy a cold beer.
 
 Configuration-----------------------------------------------------------------
 
