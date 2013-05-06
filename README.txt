@@ -13,7 +13,7 @@
 Contact Information
 ==============================================================================
 
-                Development Lead: John Tramm <john.tramm@gmail.com>
+              Development Lead: John Tramm <john.tramm@gmail.com>
 
 ==============================================================================
 What is TA Helper?
@@ -35,6 +35,10 @@ WorkFlow----------------------------------------------------------------------
 	The general workflow for grading an assignment, using the aid of TA Helper,
 	should look something like the following:
 
+	
+	Configure TA Helper (see next section)	
+	||
+	\/
 	Run TA Helper to generate directory structure and grade.txt template files.
 	||
 	\/
