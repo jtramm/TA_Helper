@@ -86,14 +86,14 @@ Running TA Helper-------------------------------------------------------------
 
 		>$ python TA_Helper.py
 
-	This should give you the following menu, and the rest should be fairly self
-	explanatory: 
+	This should give you the following menu, and the rest should be fairly
+	self explanatory:
 
 	===========================================
 	================ TA HELPER ================
 	===========================================
-				 Class: CSPP51087
-					Homework: 3
+                 Class: CSPP51087
+                    Homework: 3
 	===========================================
 	Options:
 	  1 - Generate Directories & grade.txt Files
