@@ -32,14 +32,13 @@ Download----------------------------------------------------------------------
 
 WorkFlow----------------------------------------------------------------------
 
-	The general workflow for grading an assignment, using the aid of TA Helper,
-	should look something like the following:
+	The general workflow for grading an assignment, using the aid of
+	TA Helper, should look something like the following:
 
-	
 	Configure TA Helper (see next section)	
 	||
 	\/
-	Run TA Helper to generate directory structure and grade.txt template files.
+	Run TA Helper to create directory structure and grade.txt template files.
 	||
 	\/
 	Download student HW submissions (manually) into the directory structure.
@@ -59,9 +58,9 @@ WorkFlow----------------------------------------------------------------------
 
 Configuration-----------------------------------------------------------------
 
-	Create a student roster list in the form of a "class.txt" input file. This
-	file will contain a list of students, in the form of a name and an email
-	on each line. For instance:
+	Create a student roster list in the form of a "class.txt" input file.
+	This file will contain a list of students, in the form of a name and
+	an email on each line. For instance:
 
 	John Tramm john.tramm@gmail.com
 	John Doe J.Doe@email.com
@@ -78,8 +77,8 @@ Configuration-----------------------------------------------------------------
 	The problems and points lists should correspond to one another and
 	have the same number of elements.
 
-	Note that this program only works with Gmail. Configuration for other
-	servers should be fairly trivial, but I'll leave that to you.
+	***Note*** that this program only works with Gmail. Configuration for
+	other servers should be fairly trivial, but I'll leave that to you.
 
 Running TA Helper-------------------------------------------------------------
 
