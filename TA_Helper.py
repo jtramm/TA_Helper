@@ -92,7 +92,26 @@ def generate_directories(students, problems, points, classname, HW):
 def download_emails( students, user_email_address, password ):
 	mail = imaplib.IMAP4_SSL('imap.gmail.com')
 	mail.login(user_email_address, password)
-	mail.select(clasname+"/"+str(HW)) # connect to inbox.
+	
+	# read in and parse your mail folders	
+	raw_folders = mail.list()[1]
+	folders = []	
+	for line in raw_folders:
+		tags = line.split('\"')
+		folder = tags[len(tags)-2]
+		folder = folder.strip('\"')
+		folders.append(folder)
+	
+	# Get user selection for mail folder
+	print "Your Mail Folders:"
+	ix = 0
+	for folder in folders:
+		print"  "+str(ix)+". "+folder
+		ix += 1
+	choice = raw_input("Please select folder to download: ")
+
+	mail.select(folders[int(choice)]) # connect to inbox.
+
 	result, data = mail.search(None, "ALL")
 	ids = data[0].split() # ids is a space separated string
 
