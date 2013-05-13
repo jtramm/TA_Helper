@@ -1,6 +1,8 @@
 #/bin/python
 import os
 import smtplib  
+import imaplib
+import email
 
 ################################ Configuration  ################################
 fromaddr = 'your_gmail_address'
@@ -39,12 +41,14 @@ print "==========================================="
 while( 1 ):
 	print "Options:"
 	print "  1 - Generate Directories & grade.txt Files"
-	print "  2 - Accumulate Central Grade List"
-	print "  3 - Email grade.txt Files to Students"
-	print "  4 - Quit"
+	print "  2 - Download Student Submissions From Gmail"
+	print "  3 - Decompress Student Submission Files"
+	print "  4 - Accumulate Central Grade List"
+	print "  5 - Email grade.txt Files to Students"
+	print "  6 - Quit"
 	choice = raw_input("Choose Task: ")
 	
-	if( choice == '4' ):
+	if( choice == '6' ):
 		print "Exiting!"
 		exit()
 
@@ -77,6 +81,95 @@ while( 1 ):
 		print "Directories & grade.txt Files succesfully written!\n"
 		
 	if( choice == '2' ):
+		#Download emails
+		mail = imaplib.IMAP4_SSL('imap.gmail.com')
+		mail.login(fromaddr, password)
+		mail.select(clasname+"/"+str(HW)) # connect to inbox.
+		result, data = mail.search(None, "ALL")
+		ids = data[0].split() # ids is a space separated string
+
+		# Open an array and file to record submissions centrally
+		submitted = [0]*len(students)
+		subs = open("subs.txt", 'w')
+
+		for i in ids:
+
+			result, data = mail.fetch(i, "(RFC822)") # fetch the email string
+			raw_email = data[0][1] #just the string
+
+			# Parse string into message object
+			msg = email.message_from_string(raw_email)
+			
+			addr = msg.__getitem__('from')
+			
+			words = addr.split()
+			for word in words:
+				if word.find('@') != -1:
+					student = word
+			
+			student = student.strip('<>')
+
+			for part in msg.walk():
+				#print(part.get_content_type())
+
+				if part.get_content_maintype() == 'multipart':
+					continue
+
+				if part.get('Content-Disposition') is None:
+					#print("ERROR: Content Type is Weird...")
+					continue
+
+				filename = part.get_filename()
+				if not(filename):
+					filename = "test.txt"
+					print "ERROR - QUitting"
+
+				if not os.path.exists(student):
+					print student+" not found. Select student to assign to: "
+					it = 0
+					for name, addr in students:
+						print str(it)+". "+name+" <"+addr+">"
+						it = it + 1
+					print str(it)+". Not Listed - quit"
+					print str(it+1)+". Not Listed - discard submission"
+					choice = raw_input("Choose Student: ")
+					
+					if choice == str(it):
+						print "Exiting..."
+						exit(1)
+					elif choice == str(it+1):
+						print "Skipping..."
+						continue
+					else:
+						student = students[int(choice)][1]
+						submitted[int(choice)] = 1
+				else:
+					ita = 0
+					for name, addr in students:
+						if addr == student:
+							submitted[ita] = 1
+						ita = ita + 1
+
+				path = student + '/'+ filename
+
+				fp = open(path, 'wb')
+				fp.write(part.get_payload(decode=1))
+				fp.close
+
+		ita = 0
+		for name, addr in students:
+			subs.write(name+" <"+addr+"> :")
+			if submitted[ita] == 1:
+				subs.write(" RECEIVED")
+			ita = ita + 1
+			subs.write("\n")
+		subs.close
+	
+	if( choice == '3' ):
+		# Unzip all Files
+		print "functionality not implemented yet"
+
+	if( choice == '4' ):
 		# Write Grade List
 		grades = []
 		for name, email in students:
@@ -95,7 +188,7 @@ while( 1 ):
 		fp.close
 		print "Central grade list (HW"+str(HW)+"_grades.txt) created!\n"
 
-	if( choice == '3' ):
+	if( choice == '5' ):
 		# Read in scripts
 		scripts = []
 		for name, email in students:
