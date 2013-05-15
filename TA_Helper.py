@@ -3,6 +3,9 @@ import os
 import smtplib  
 import imaplib
 import email
+import time
+from subprocess import call
+from subprocess import check_call
 
 ################################ Configuration  ################################
 user_email_address = 'your_gmail_address'
@@ -12,6 +15,25 @@ HW = 3
 problems = ["1(a) - pp_ser.c", "1(b) - reoder.c", "1(c) - io.c", "2 - Advection"]
 points   = [30, 20, 20, 30]
 ################################################################################
+
+# Decompresses submissions
+def unzip_submissions():
+	for root, dirs, files in os.walk("."): 
+		for f in files: 
+			obj = os.path.abspath(os.path.join(root, f)) 
+			(dirname, filename) = os.path.split(obj)
+			message = "Decompressing "+f
+			if f.endswith(".zip"):
+				print message
+				cmd = 'unzip -u -d '+dirname+' '+obj+' > /dev/null'
+				call(cmd, shell=True)
+			elif f.endswith(".tar.gz"):
+				print message
+				call(['tar','-xzf',obj, '-C', dirname])
+			elif f.endswith(".tar"):
+				print message
+				call(['tar','-xf',obj, '-C', dirname])
+	return
 
 # Read in class.txt class list
 def get_class_list():
@@ -46,7 +68,7 @@ def get_task_choice():
 	print "Options:"
 	print "  1 - Generate Directories & grade.txt Files"
 	print "  2 - Download Student Submissions From Gmail"
-	print "  3 - Decompress Student Submission Files"
+	print "  3 - Decompress Student Submission Files (.zip, .tar,"
 	print "  4 - Accumulate Central Grade List"
 	print "  5 - Email grade.txt Files to Students"
 	print "  6 - Quit"
@@ -182,6 +204,7 @@ def download_emails( students, user_email_address, password ):
 			fp = open(path, 'wb')
 			fp.write(part.get_payload(decode=1))
 			fp.close
+			time.sleep(5)
 
 	# write out the subs.txt file to keep track of missing submissions
 	ita = 0
@@ -217,6 +240,7 @@ def generate_grade_list(students):
 
 	return
 
+# Email grade.txt files to students
 def email_grades(students, user_email_address, password):
 	# Read in scripts
 	scripts = []
@@ -247,15 +271,34 @@ def email_grades(students, user_email_address, password):
 	server = smtplib.SMTP('smtp.gmail.com:587')  
 	server.starttls()  
 	server.login(username,password)
-	i = 0  
-	for name, email in students:
-		approval = raw_input("Send Grade to "+name+"? (y/n): ")
-		if approval == 'y':
-			server.sendmail(user_email_address, email, scripts[i])  
-			print name+"'s script has been sent to "+email
+	
+	# Give user option to send emails to everyone
+	yes = raw_input("Send grades to ALL students? (y/n): ")
+	if yes == 'y':
+		really = raw_input("Are you SURE? (y/n): ")
+		if really == 'y':
+			i = 0  
+			for name, email in students:
+				server.sendmail(user_email_address, email, scripts[i])  
+				print name+"'s script has been sent to "+email
+				i = i + 1
+			server.quit()  
+			return
 		else:
-			print "Skipping "+name+"..."
-		i = i + 1
+			print "OK, not doing anything"
+			server.quit()  
+			return
+	else:
+		print "Ok, let's send grades to SOME students then..."
+		i = 0  
+		for name, email in students:
+			approval = raw_input("Send Grade to "+name+"? (y/n): ")
+			if approval == 'y':
+				server.sendmail(user_email_address, email, scripts[i])  
+				print name+"'s script has been sent to "+email
+			else:
+				print "Skipping "+name+"..."
+			i = i + 1
 	server.quit()  
 	
 	print "All requested Emails have been sent!\n"
@@ -272,7 +315,7 @@ while( 1 ):
 	if choice == 1   :
 		generate_directories( students, problems, points, classname, HW )
 	elif choice == 2 : download_emails( students, user_email_address, password )
-	elif choice == 3 : print "functionality not implemented yet"
+	elif choice == 3 : unzip_submissions()
 	elif choice == 4 : generate_grade_list( students )
 	elif choice == 5 : email_grades( students, user_email_address, password )
 	else :
