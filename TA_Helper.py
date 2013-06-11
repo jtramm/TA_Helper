@@ -4,6 +4,8 @@ import smtplib
 import imaplib
 import email
 import time
+import getpass
+import base64
 from subprocess import call
 from subprocess import check_call
 
@@ -15,6 +17,30 @@ HW = 3
 problems = ["1(a) - pp_ser.c", "1(b) - reoder.c", "1(c) - io.c", "2 - Advection"]
 points   = [30, 20, 20, 30]
 ################################################################################
+
+# Gets and Stores User Credentials
+def get_credentials():
+	found = 1
+	try:
+		with open('credentials.dat'): pass
+	except IOError:
+		print "credentials.dat file not found"
+		found = 0
+	if found == 0:
+		user_email_address = raw_input("Gmail Address: ")
+		password = getpass.getpass()
+		save = raw_input("Credentials gathered. Would you like to encode & save them? (y/n): ")
+		if save == "y":
+			cred = open('credentials.dat', 'w')
+			cred.write(base64.b64encode(user_email_address))
+			cred.write('\n')
+			cred.write(base64.b64encode(password))
+			cred.close()
+	if found == 1:
+		cred = open('credentials.dat', 'r')
+		user_email_address = base64.b64decode(cred.readline())
+		password = base64.b64decode(cred.readline())
+	return
 
 # Decompresses submissions
 def unzip_submissions():
@@ -112,6 +138,7 @@ def generate_directories(students, problems, points, classname, HW):
 
 #Download emails
 def download_emails( students, user_email_address, password ):
+	get_credentials()
 	mail = imaplib.IMAP4_SSL('imap.gmail.com')
 	mail.login(user_email_address, password)
 	
@@ -242,6 +269,7 @@ def generate_grade_list(students):
 
 # Email grade.txt files to students
 def email_grades(students, user_email_address, password):
+	get_credentials()
 	# Read in scripts
 	scripts = []
 	for name, email in students:
