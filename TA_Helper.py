@@ -10,12 +10,10 @@ from subprocess import call
 from subprocess import check_call
 
 ################################ Configuration  ################################
-user_email_address = 'your_gmail_address'
-password = 'your_password'
 classname = "CSPP51087"
-HW = 3
-problems = ["1(a) - pp_ser.c", "1(b) - reoder.c", "1(c) - io.c", "2 - Advection"]
-points   = [30, 20, 20, 30]
+HW = 4
+problems = ["1 - Mandelbrot Redux", "2 - Hashing Histogram", "3 - Advection Battle", "4 - Extra Credit Hybrid"]
+points   = [30, 35, 35, 0]
 ################################################################################
 
 # Gets and Stores User Credentials
@@ -40,7 +38,8 @@ def get_credentials():
 		cred = open('credentials.dat', 'r')
 		user_email_address = base64.b64decode(cred.readline())
 		password = base64.b64decode(cred.readline())
-	return
+	user = [user_email_address, password]
+	return user
 
 # Decompresses submissions
 def unzip_submissions():
@@ -137,8 +136,13 @@ def generate_directories(students, problems, points, classname, HW):
 	return
 
 #Download emails
-def download_emails( students, user_email_address, password ):
-	get_credentials()
+def download_emails( students ):
+	
+	# Get gmail credentials
+	user = get_credentials()
+	user_email_address = user[0]
+	password = user[1]
+
 	mail = imaplib.IMAP4_SSL('imap.gmail.com')
 	mail.login(user_email_address, password)
 	
@@ -268,8 +272,12 @@ def generate_grade_list(students):
 	return
 
 # Email grade.txt files to students
-def email_grades(students, user_email_address, password):
-	get_credentials()
+def email_grades(students):
+	# Get Gmail account credentials
+	user = get_credentials()
+	user_email_address = user[0]
+	password = user[1]
+
 	# Read in scripts
 	scripts = []
 	for name, email in students:
@@ -342,10 +350,10 @@ while( 1 ):
 		
 	if choice == 1   :
 		generate_directories( students, problems, points, classname, HW )
-	elif choice == 2 : download_emails( students, user_email_address, password )
+	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
 	elif choice == 4 : generate_grade_list( students )
-	elif choice == 5 : email_grades( students, user_email_address, password )
+	elif choice == 5 : email_grades( students  )
 	else :
 		print "Exiting!"
 		exit()
