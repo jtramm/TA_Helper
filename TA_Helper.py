@@ -235,7 +235,7 @@ def download_emails( students ):
 			fp = open(path, 'wb')
 			fp.write(part.get_payload(decode=1))
 			fp.close
-			time.sleep(5)
+			#time.sleep(5)
 
 	# write out the subs.txt file to keep track of missing submissions
 	ita = 0
