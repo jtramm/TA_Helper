@@ -14,7 +14,46 @@ classname = "CSPP51087"
 HW = 4
 problems = ["1 - Mandelbrot Redux", "2 - Hashing Histogram", "3 - Advection Battle", "4 - Extra Credit Hybrid"]
 points   = [30, 35, 35, 0]
+num_students = 13
 ################################################################################
+
+# Uploades grades to google docs spreadsheet
+def get_students_from_gmail( ):
+	try: import gspread
+	except ImportError:
+		print "Install gpsread library (on github @ https://github.com/burnash/gspread)"
+		print "Note - library is super easy to install!"
+		return
+
+	user = get_credentials()
+	
+	# Login with your Google account
+	gc = gspread.login(user[0],user[1])
+
+	# Spreadsheets can be opened by their title in Google Docs
+	spreadsheet = gc.open("grades")
+
+	# Select worksheet by index
+	worksheet = spreadsheet.get_worksheet(0)
+
+	# Update cell with your form value
+	#worksheet.update_cell(1, 2, 'woot!')
+
+	ncells = 'A2:A' + str(num_students+1)
+	cell_list = worksheet.range(ncells)
+	names = []
+	for cell in cell_list:
+		names.append(cell.value)
+	
+	ncells = 'B2:B' + str(num_students+1)	
+	cell_list = worksheet.range(ncells)
+	emails = []
+	for cell in cell_list:
+		emails.append(cell.value)
+	
+	students = zip(names, emails)
+
+	return students
 
 # Gets and Stores User Credentials
 def get_credentials():
@@ -61,6 +100,7 @@ def unzip_submissions():
 	return
 
 # Read in class.txt class list
+# Not really used anymore. Now students are DL'd from gmail spreadsheet
 def get_class_list():
 	lines = [line.strip() for line in open('class.txt')]
 	emails = []
@@ -96,7 +136,8 @@ def get_task_choice():
 	print "  3 - Decompress Student Submission Files (.zip, .tar,"
 	print "  4 - Accumulate Central Grade List"
 	print "  5 - Email grade.txt Files to Students"
-	print "  6 - Quit"
+	print "  6 - Upload Grades to Google Docs"
+	print "  7 - Quit"
 	while(1):
 		choice = raw_input("Choose Task: ")
 		try:
@@ -342,7 +383,7 @@ def email_grades(students):
 	return
 
 # Central program loop
-students = get_class_list()
+students = get_students_from_gmail()
 print_header( classname, HW )
 while( 1 ):
 
@@ -353,7 +394,8 @@ while( 1 ):
 	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
 	elif choice == 4 : generate_grade_list( students )
-	elif choice == 5 : email_grades( students  )
+	elif choice == 5 : email_grades( students )
+	elif choice == 6 : upload_grades( students )
 	else :
 		print "Exiting!"
 		exit()
