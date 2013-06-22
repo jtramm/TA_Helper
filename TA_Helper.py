@@ -15,7 +15,45 @@ HW = 4
 problems = ["1 - Mandelbrot Redux", "2 - Hashing Histogram", "3 - Advection Battle", "4 - Extra Credit Hybrid"]
 points   = [30, 35, 35, 0]
 num_students = 13
+spreadsheet_name = 'grades'
 ################################################################################
+	
+def upload_grades( students ):
+	try: import gspread
+	except ImportError:
+		print "Install gpsread library (on github @ https://github.com/burnash/gspread)"
+		print "Note - library is super easy to install!"
+		return
+	
+	user = get_credentials()
+	gc = gspread.login(user[0],user[1])
+	spreadsheet = gc.open(spreadsheet_name)
+	worksheet = spreadsheet.get_worksheet(0)
+	
+	grades = []
+	for name, email in students:
+		if os.path.exists(email):
+			lines = [line.strip() for line in open(email+"/grade.txt",'r')]
+			for line in lines:
+				if line.find("Grade:") == 0:
+					grade = line.lstrip("Grade:")
+					words = grade.rsplit('/');
+					grades.append(words[0])
+		else:
+			print "ERROR! Student: "+email+" Not Found!\n"
+			print "grades not uploaded..."
+			return
+	
+	col = worksheet.find("HW"+str(HW))
+	i = 2
+	for g in grades:
+		worksheet.update_cell(i,col.col, g)
+		i += 1
+
+	print "Grades have been uploaded to spreadsheet: "+spreadsheet_name
+
+	return
+
 
 # Uploades grades to google docs spreadsheet
 def get_students_from_gmail( ):
@@ -31,7 +69,7 @@ def get_students_from_gmail( ):
 	gc = gspread.login(user[0],user[1])
 
 	# Spreadsheets can be opened by their title in Google Docs
-	spreadsheet = gc.open("grades")
+	spreadsheet = gc.open(spreadsheet_name)
 
 	# Select worksheet by index
 	worksheet = spreadsheet.get_worksheet(0)
