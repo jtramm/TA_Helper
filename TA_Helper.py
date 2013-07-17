@@ -135,6 +135,9 @@ def unzip_submissions():
 			elif f.endswith(".tar"):
 				print message
 				call(['tar','-xf',obj, '-C', dirname])
+			elif f.endswith(".rar"):
+				print message
+				call(['unrar','e',obj,dirname])
 	return
 
 # Read in class.txt class list
