@@ -18,6 +18,7 @@ num_students = 13
 spreadsheet_name = 'grades'
 ################################################################################
 	
+# Uploads grades to google docs spreadsheet
 def upload_grades( students ):
 	try: import gspread
 	except ImportError:
@@ -54,8 +55,7 @@ def upload_grades( students ):
 
 	return
 
-
-# Uploades grades to google docs spreadsheet
+# Gets the class list from google spreadsheet
 def get_students_from_gmail( ):
 	try: import gspread
 	except ImportError:

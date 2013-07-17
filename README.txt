@@ -20,7 +20,8 @@ What is TA Helper?
 ==============================================================================
 
 This is a short program used for managing student submissions and
-automatically emailing out grades/comments.
+automatically emailing out grades/comments. It relies heavily on
+Gmail and Google Docs, so you will definitely need a gmail account.
 
 ==============================================================================
 How Do I Use TA Helper
@@ -38,10 +39,13 @@ WorkFlow----------------------------------------------------------------------
 	Configure TA Helper (see next section)	
 	||
 	\/
-	Run TA Helper to create directory structure and grade.txt template files.
+	Use TA Helper to create directory structure and grade.txt template files.
 	||
 	\/
-	Download student HW submissions (manually) into the directory structure.
+	Use TA Helper to download student HW submissions into the directory structure.
+	||
+	\/
+	Use TA Helper to unzip all student HW submissions (zip, tar, tgz).
 	||
 	\/
 	Grade Homeworks.
