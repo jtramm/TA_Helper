@@ -171,7 +171,7 @@ def get_task_choice():
 	print "Options:"
 	print "  1 - Generate Directories & grade.txt Files"
 	print "  2 - Download Student Submissions From Gmail"
-	print "  3 - Decompress Student Submission Files (.zip, .tar,"
+	print "  3 - Decompress Student Submission Files (.zip, .tar, .tgz)"
 	print "  4 - Accumulate Central Grade List"
 	print "  5 - Email grade.txt Files to Students"
 	print "  6 - Upload Grades to Google Docs"
