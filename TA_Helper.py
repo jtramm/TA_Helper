@@ -129,7 +129,7 @@ def unzip_submissions():
 				print message
 				cmd = 'unzip -u -d '+dirname+' '+obj+' > /dev/null'
 				call(cmd, shell=True)
-			elif f.endswith(".tar.gz"):
+			elif f.endswith(".tar.gz") or f.endswith(".tgz"):
 				print message
 				call(['tar','-xzf',obj, '-C', dirname])
 			elif f.endswith(".tar"):
