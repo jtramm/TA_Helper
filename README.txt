@@ -84,6 +84,9 @@ Configuration-----------------------------------------------------------------
 	***Note*** that this program only works with Gmail. Configuration for
 	other servers should be fairly trivial, but I'll leave that to you.
 
+	***Note*** If you want to unzip rar files, please install unrar on
+	your machine. (can be done on macs with macports)
+
 Running TA Helper-------------------------------------------------------------
 
 	Once configured, simply run via the command:
