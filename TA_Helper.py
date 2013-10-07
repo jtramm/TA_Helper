@@ -17,6 +17,107 @@ points   = [30, 35, 35, 0]
 num_students = 13
 spreadsheet_name = 'grades'
 ################################################################################
+
+def get_assignment():
+
+	if not os.path.exists('problems.dat'):
+		print "You need to define the problems for this assignment in the problems.dat file"
+		exit(0)
+
+	lines = [line.strip() for line in open("problems.dat",'r')]
+
+	n = 0 #line number
+
+	# Assignment Type
+	assignment = lines[n].split('=')
+	assignment = assignment[1].split()[0]
+	n += 1
+
+	# Assignment Number
+	anumber = lines[n].split('=')
+	anumber = anumber[1].split()[0]
+	n += 1
+
+	# Number of Problems
+	nproblems = lines[n].split('=')
+	nproblems = int(nproblems[1].split()[0])
+	n += 1
+
+	# Loop over Problems
+	problems = []
+	for i in range(1, nproblems+1):
+		n += 1
+		
+		# Problem Name
+		name = lines[n].split('=')
+		name = name[1].strip()
+		n += 1
+		 
+		# Problem File Name
+		fname = lines[n].split('=')
+		fname = fname[1].split()[0]
+		n += 1
+
+		# Problem Credit Value
+		value = lines[n].split('=')
+		value = int(value[1].split()[0])
+		n += 1
+		
+		# Credit Type (regular or extra)
+		credit = lines[n].split('=')
+		credit = credit[1].split()[0]
+		n += 1
+
+		# Number of tests
+		ntests = lines[n].split('=')
+		ntests = int(ntests[1].split()[0])
+		n += 1
+
+		# Loop over Tests
+		tests = []
+		for j in range(1, ntests+1):
+			n += 1
+			test = lines[n].strip()
+			n += 1
+			tests.append(test)
+		
+		# Add all data to problem
+		problem = {'name' : name, 'fname' : fname, 'value' : value, 'credit' : credit, 'ntests' : ntests, 'tests' : tests}
+
+		problems.append(problem)
+
+	# print problems
+	#for p in problems:
+	#	print p['name']
+	#	print p['fname']
+	#	print p['value']
+	#	print p['credit']
+	#	print p['ntests']
+	#	for t in p['tests']:
+	#		print t
+	
+	full_assignment = assignment, anumber, nproblems, problems 
+
+	return full_assignment
+		
+a = get_assignment()
+print a
+exit()
+
+# Compiles All Student Code
+def compile(students):
+	grades = []
+	for name, email in students:
+		if os.path.exists(email):
+			for i in range(1,11):
+				if os.path.exists(email+'/p'+str(i)):
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/p'+str(i)+'.c'])
+				else:
+					print "No p"+str(i)+".c found for student "+email
+					exit(5)
+	return
+
+
 	
 # Uploads grades to google docs spreadsheet
 def upload_grades( students ):
