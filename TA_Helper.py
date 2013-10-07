@@ -291,6 +291,7 @@ def get_task_choice():
 
 # Generates directory structure and grade.txt files
 def generate_directories(students, problems, points, classname, HW):
+
 	for name, email in students:
 		if not os.path.exists(email):
 			os.makedirs(email)
@@ -310,6 +311,47 @@ def generate_directories(students, problems, points, classname, HW):
 		for problem, point in zip(problems, points):
 			fp.write("Problem "+problem+"    Grade: ")
 			fp.write(" / "+str(point)+"\n")
+			fp.write("\n\n\n")
+			for i in range(1,70):
+				fp.write("#")
+			fp.write("\n")	
+		fp.close
+	print "Directories & grade.txt Files succesfully written!\n"
+	return
+
+# IMPROVED Generates directory structure and grade.txt files
+def generate_directories(students, classname):
+	assignment = get_assignment()
+	atype = assignment[0]
+	anumber = assignment[1]
+	nproblems = assignment[2]
+	problems = assignment[3]
+
+	points = 0
+	for p in problems:
+		if p['credit'] == 'regular':
+			points += p['value']
+
+
+	for name, email in students:
+		if not os.path.exists(email):
+			os.makedirs(email)
+		fp = open(email+"/grade.txt", 'w')
+		for i in range(1,70):
+			fp.write("#")
+		fp.write("\n")
+		fp.write("Grade:  / "+str(points)+"\n")
+		fp.write("Student: "+name+"\n")
+		fp.write("Email: "+email+"\n")
+		fp.write("Class: "+classname+"\n")
+		fp.write(atype+str(anumber)+"\n")
+		for i in range(1,70):
+			fp.write("#")
+		fp.write("\n")
+		
+		i = 1
+		for problem in problems:
+			fp.write("Problem "+i+": "+problem['name']+"    Grade:  / "+str(problem['value']+"\n")
 			fp.write("\n\n\n")
 			for i in range(1,70):
 				fp.write("#")
