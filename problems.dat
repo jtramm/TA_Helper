@@ -1,0 +1,125 @@
+assignment = HW1
+assignment number = 1
+nproblems = 10
+problem 1:
+	name = Leap Year
+	fname = p1.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p1 2000 1985 2011 2400
+	test 2:
+		./p1 157 400 1400
+problem 2:
+	name = Tabs to Space
+	fname = p2.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p2 p2_test_A.txt
+	test 2:
+		./p2 p2_test_B.txt	
+problem 3:
+	name = File Read In
+	fname = p3.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p3 p3_test_A.txt
+	test 2:
+		./p3 p3_test_B.txt	
+problem 4:
+	name = Unscrambler
+	fname = 4.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p4 able nrea myze
+	test 2:
+		./p4 cast dale nods spit 
+problem 5:
+	name = Repeat Counter
+	fname = p5.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p5 p5_test_A.txt
+	test 2:
+		./p5 p5_test_B.txt	
+problem 6:
+	name = Permuter
+	fname = p6.c
+	value = 10
+	credit = regular
+	ntests = 2
+	test 1:
+		./p6 pop to 
+	test 2:
+		./p2 hi text tests
+problem 7:
+	name = Integer Endianness
+	fname = p7.c
+	value = 10
+	credit = regular
+	ntests = 5
+	test 1:
+		./p7 1
+	test 2:
+		./p7 453
+	test 3:
+		./p7 12312
+	test 4:
+		./p7 100000
+	test 5:
+		./p7 92134523
+problem 8:
+	name = Floating Point Bit Pattern
+	fname = p8.c
+	value = 10
+	credit = regular
+	ntests = 5
+	test 1:
+		./p8 19.86
+	test 2:
+		./p8 -19.86
+	test 3:
+		./p8 4.65e7
+	test 4:
+		./p8 0.12
+	test 5:
+		./p8 7.23e-3
+problem 9:
+	name = Malformed Integer
+	fname = p9.c
+	value = 10
+	credit = regular
+	ntests = 6
+	test 1:
+		./p9 3 2
+	test 2:
+		./p9 3 x23
+	test 3:
+		./p9 3.5 4
+	test 4:
+		./p9 543 19
+	test 5:
+		./p9 3211 574a3
+	test 6:
+		./p9 4321. 1231
+problem 10:
+	name = Running Average
+	fname = p10.c
+	value = 10
+	credit = regular
+	ntests = 3
+	test 1:
+		./p10 p10_test_A.txt
+	test 2:
+		./p10 p10_test_B.txt	
+	test 3:
+		./p10 p10_test_C.txt	
