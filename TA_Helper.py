@@ -12,6 +12,7 @@ from subprocess import check_call
 ################################ Configuration  ################################
 num_students = 35 
 spreadsheet_name = 'CSPP51040 Grades'
+column_name = 'HW1'
 ################################################################################
 
 # Compiles All Student Code
@@ -24,7 +25,6 @@ def compile_subs(students):
 					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/p'+str(i)+'.c'])
 				else:
 					print "No p"+str(i)+".c found for student "+email
-					exit(5)
 	return
 
 # Get Assignment Details from input File
@@ -142,7 +142,7 @@ def upload_grades( students ):
 			print "grades not uploaded..."
 			return
 	
-	col = worksheet.find("HW"+str(HW))
+	col = worksheet.find(column_name)
 	i = 2
 	for g in grades:
 		worksheet.update_cell(i,col.col, g)
@@ -257,37 +257,6 @@ def get_class_list():
 	students = zip(names, emails)
 
 	return students
-
-
-# Generates directory structure and grade.txt files
-def old_generate_directories(students, problems, points, classname, HW):
-
-	for name, email in students:
-		if not os.path.exists(email):
-			os.makedirs(email)
-		fp = open(email+"/grade.txt", 'w')
-		for i in range(1,70):
-			fp.write("#")
-		fp.write("\n")
-		fp.write("Grade:  / "+str(sum(points))+"\n")
-		fp.write("Student: "+name+"\n")
-		fp.write("Email: "+email+"\n")
-		fp.write("Class: "+classname+"\n")
-		fp.write("Homework: "+str(HW)+"\n")
-		for i in range(1,70):
-			fp.write("#")
-		fp.write("\n")
-
-		for problem, point in zip(problems, points):
-			fp.write("Problem "+problem+"    Grade: ")
-			fp.write(" / "+str(point)+"\n")
-			fp.write("\n\n\n")
-			for i in range(1,70):
-				fp.write("#")
-			fp.write("\n")	
-		fp.close
-	print "Directories & grade.txt Files succesfully written!\n"
-	return
 
 # IMPROVED Generates directory structure and grade.txt files
 def generate_directories(students, classname):
@@ -460,11 +429,11 @@ def generate_grade_list(students):
 			print "ERROR! Student: "+email+" Not Found!\n"
 			exit()
 
-	fp = open("HW"+str(HW)+"_grades.txt", "w")
+	fp = open(column_name+"_grades.txt", "w")
 	for grade in grades:
 		fp.write(grade+"\n")
 	fp.close
-	print "Central grade list (HW"+str(HW)+"_grades.txt) created!\n"
+	print "Central grade list ("+column_name+"_grades.txt) created!\n"
 
 	return
 
