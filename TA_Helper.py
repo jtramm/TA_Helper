@@ -19,14 +19,16 @@ column_name = 'HW1'
 ################################################################################
 
 # Auto-Grade
+# Need to have some allowance for differences in whitespace I think....
 def auto_grade():
 	problems = assignment[4]
 	for name, email in students:
 		print "Grading student: "+name
 		results = []
+		grades = []
 		for problem in problems:
+			grade = problem['value']
 			if os.path.exists(email+'/'+problem['fname']):
-				grade = problem['value']
 				notes = []
 				for test in problem['tests']:
 					try:
@@ -37,7 +39,7 @@ def auto_grade():
 						reference = check_output(['./'+test], shell=True)
 					except CalledProcessError as e:
 						reference = e.output
-					if cmp(submittal,reference) != 0:
+					if cmp(submittal.replace(' ',''),reference.replace(' ','') )!= 0:
 						notes.append("Test Failed!")
 						notes.append("Test: "+test)
 						notes.append("Your Code Produced: ")
@@ -50,17 +52,21 @@ def auto_grade():
 						notes.append("Test Passed.")
 						notes.append("Test: "+test)
 				results.append(notes)
-			#else:
-				#results.append(["Not Submitted"])
-
+			else:
+				results.append(["Not Submitted"])
+				grade = 0
+			
+			grades.append(grade)
 		
 		#print results
 		# Now we want to actually write the grades (...)
 		#lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
-		for result in results:
-			for note in result:
-				print note	
-		print results
+		#for result in results:
+			#for note in result:
+				#print note	
+		#print results
+		
+		print grades
 		
 
 # Compiles All Student Code
