@@ -10,12 +10,10 @@ from subprocess import call
 from subprocess import check_call
 
 ################################ Configuration  ################################
-classname = "CSPP51087"
-HW = 4
-problems = ["1 - Mandelbrot Redux", "2 - Hashing Histogram", "3 - Advection Battle", "4 - Extra Credit Hybrid"]
-points   = [30, 35, 35, 0]
-num_students = 13
-spreadsheet_name = 'grades'
+classname = "CSPP51040"
+num_students = 35 
+spreadsheet_name = 'CSPP51040 Grades'
+HW = 1
 ################################################################################
 
 def get_assignment():
@@ -99,10 +97,6 @@ def get_assignment():
 	full_assignment = assignment, anumber, nproblems, problems 
 
 	return full_assignment
-		
-a = get_assignment()
-print a
-exit()
 
 # Compiles All Student Code
 def compile(students):
@@ -290,7 +284,7 @@ def get_task_choice():
 			return i
 
 # Generates directory structure and grade.txt files
-def generate_directories(students, problems, points, classname, HW):
+def old_generate_directories(students, problems, points, classname, HW):
 
 	for name, email in students:
 		if not os.path.exists(email):
@@ -344,16 +338,17 @@ def generate_directories(students, classname):
 		fp.write("Student: "+name+"\n")
 		fp.write("Email: "+email+"\n")
 		fp.write("Class: "+classname+"\n")
-		fp.write(atype+str(anumber)+"\n")
+		fp.write(atype+': '+str(anumber)+"\n")
 		for i in range(1,70):
 			fp.write("#")
 		fp.write("\n")
 		
 		i = 1
 		for problem in problems:
-			fp.write("Problem "+i+": "+problem['name']+"    Grade:  / "+str(problem['value']+"\n")
+			fp.write("Problem "+str(i)+": "+problem['name']+"    Grade:  / "+str(problem['value'])+"\n")
+			i += 1
 			fp.write("\n\n\n")
-			for i in range(1,70):
+			for j in range(1,70):
 				fp.write("#")
 			fp.write("\n")	
 		fp.close
@@ -574,7 +569,9 @@ while( 1 ):
 	choice = get_task_choice()
 		
 	if choice == 1   :
-		generate_directories( students, problems, points, classname, HW )
+		#generate_directories( students, problems, points, classname, HW )
+		generate_directories( students, classname )
+
 	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
 	elif choice == 4 : generate_grade_list( students )
