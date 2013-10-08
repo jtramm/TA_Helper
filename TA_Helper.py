@@ -7,6 +7,7 @@ import email
 import time
 import getpass
 import base64
+import fileinput
 from subprocess import call
 from subprocess import check_call
 from subprocess import check_output
@@ -21,6 +22,7 @@ column_name = 'HW1'
 # Auto-Grade
 # Need to have some allowance for differences in whitespace I think....
 def auto_grade():
+	nproblems = assignment[3]
 	problems = assignment[4]
 	for name, email in students:
 		print "Grading student: "+name
@@ -66,8 +68,26 @@ def auto_grade():
 				#print note	
 		#print results
 		
-		print grades
-		
+		update = []
+		if os.path.exists(email+'/grade.txt'):
+			lines = [line.strip() for line in open(email+'/grade.txt','r')]
+			for line in lines:
+				is_grade = 0
+				for i in range(1, nproblems+1):
+					if line.startswith('Problem '+str(i)+":"):
+						print "found grade line "+str(i)
+						tokens = line.split('/')
+						tokens.insert(1,' /')
+						tokens.insert(1,str(grades[i-1]))
+						tokens = ''.join(tokens)
+						update.append(tokens)
+						is_grade = 1
+				if is_grade == 0:
+					update.append(line)
+		f = open(email+"/grade.txt", 'w')
+		for line in update:
+			f.write(line+'\n')
+		f.close()
 
 # Compiles All Student Code
 def compile_subs(students):
