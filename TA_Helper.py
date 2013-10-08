@@ -15,16 +15,45 @@ spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
 
+# Auto-Grade
+def auto_grade():
+	problems = assignment[4]
+	for name, email in students:
+		results = []
+		for problem in problems:
+			grade = problem['value']
+			notes = []
+			for test in problem['tests']:
+				submittal = check_call(email+'/'+test)
+				reference = check_call('./'+test)
+				if cmp(submittal,reference) != 0:
+					notes.append("Test Failed!")
+					notes.append("Test: "+test)
+					notes.append("Your Code Produced: ")
+					notes.append(submittal)
+					notes.append("Solution Produced: ")
+					notes.append(reference)
+					if grade > 0:
+						grade = grade / 2
+			results.append(notes)
+
+		# Now we want to actually write the grades (...)
+		lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
+		
+
 # Compiles All Student Code
 def compile_subs(students):
 	grades = []
+	nproblems = assignment[3]
+	problems = assignment[4]
 	for name, email in students:
 		if os.path.exists(email):
-			for i in range(1,11):
-				if os.path.exists(email+'/p'+str(i)):
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/p'+str(i)+'.c'])
+			i = 1
+			for p in problems:
+				if os.path.exists(email+'/'+p['fname']):
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i))
 				else:
-					print "No p"+str(i)+".c found for student "+email
+					print "No "+p['fname']+" found for student "+email
 	return
 
 # Get Assignment Details from input File
