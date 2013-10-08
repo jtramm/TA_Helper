@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import os
+import sys
 import smtplib  
 import imaplib
 import email
@@ -37,8 +38,9 @@ def auto_grade():
 						grade = grade / 2
 			results.append(notes)
 
+		print results
 		# Now we want to actually write the grades (...)
-		lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
+		#lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
 		
 
 # Compiles All Student Code
@@ -51,7 +53,7 @@ def compile_subs(students):
 			i = 1
 			for p in problems:
 				if os.path.exists(email+'/'+p['fname']):
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i))
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i)])
 				else:
 					print "No "+p['fname']+" found for student "+email
 	return
@@ -264,6 +266,18 @@ def unzip_submissions():
 			elif f.endswith(".rar"):
 				print message
 				call(['unrar','e',obj,dirname])
+	
+	# Summon All submission to top level student directories
+	for name, email in students:
+		dir_to_flatten = email 
+		for dirpath, dirnames, filenames in os.walk(dir_to_flatten):
+			for filename in filenames:
+				if filename.endswith(".c"):
+					try:
+						os.rename(os.path.join(dirpath, filename), os.path.join(dir_to_flatten, filename))
+					except OSError:
+						print ("Could not move %s " % os.join(dirpath, filename))
+
 	return
 
 # Read in class.txt class list
@@ -288,7 +302,7 @@ def get_class_list():
 	return students
 
 # IMPROVED Generates directory structure and grade.txt files
-def generate_directories(students, classname):
+def generate_directories(students):
 
 	classname = assignment[0]
 	atype = assignment[1]
@@ -576,7 +590,7 @@ while( 1 ):
 
 	choice = get_task_choice()
 		
-	if choice == 1   : generate_directories( students, classname )
+	if choice == 1   : generate_directories( students )
 	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
 	elif choice == 4 : compile_subs() 
