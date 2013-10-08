@@ -9,6 +9,8 @@ import getpass
 import base64
 from subprocess import call
 from subprocess import check_call
+from subprocess import check_output
+from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
 num_students = 35 
@@ -20,27 +22,45 @@ column_name = 'HW1'
 def auto_grade():
 	problems = assignment[4]
 	for name, email in students:
+		print "Grading student: "+name
 		results = []
 		for problem in problems:
-			grade = problem['value']
-			notes = []
-			for test in problem['tests']:
-				submittal = check_call(email+'/'+test)
-				reference = check_call('./'+test)
-				if cmp(submittal,reference) != 0:
-					notes.append("Test Failed!")
-					notes.append("Test: "+test)
-					notes.append("Your Code Produced: ")
-					notes.append(submittal)
-					notes.append("Solution Produced: ")
-					notes.append(reference)
-					if grade > 0:
-						grade = grade / 2
-			results.append(notes)
+			if os.path.exists(email+'/'+problem['fname']):
+				grade = problem['value']
+				notes = []
+				for test in problem['tests']:
+					try:
+						submittal = check_output([email+'/'+test], shell=True)
+					except CalledProcessError as e:
+						submittal = e.output
+					try:
+						reference = check_output(['./'+test], shell=True)
+					except CalledProcessError as e:
+						reference = e.output
+					if cmp(submittal,reference) != 0:
+						notes.append("Test Failed!")
+						notes.append("Test: "+test)
+						notes.append("Your Code Produced: ")
+						notes.append(submittal)
+						notes.append("Solution Produced: ")
+						notes.append(reference)
+						if grade > 0:
+							grade = grade / 2
+					else:
+						notes.append("Test Passed.")
+						notes.append("Test: "+test)
+				results.append(notes)
+			#else:
+				#results.append(["Not Submitted"])
 
-		print results
+		
+		#print results
 		# Now we want to actually write the grades (...)
 		#lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
+		for result in results:
+			for note in result:
+				print note	
+		print results
 		
 
 # Compiles All Student Code
@@ -53,7 +73,8 @@ def compile_subs(students):
 			i = 1
 			for p in problems:
 				if os.path.exists(email+'/'+p['fname']):
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i)])
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/'+p['fname']])
+					i += 1
 				else:
 					print "No "+p['fname']+" found for student "+email
 	return
@@ -593,7 +614,7 @@ while( 1 ):
 	if choice == 1   : generate_directories( students )
 	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
-	elif choice == 4 : compile_subs() 
+	elif choice == 4 : compile_subs(students) 
 	elif choice == 5 : auto_grade()
 	elif choice == 6 : generate_grade_list( students )
 	elif choice == 7 : email_grades( students )
