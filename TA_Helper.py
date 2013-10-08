@@ -8,6 +8,7 @@ import time
 import getpass
 import base64
 import fileinput
+import random
 from subprocess import call
 from subprocess import check_call
 from subprocess import check_output
@@ -24,6 +25,7 @@ column_name = 'HW1'
 def auto_grade():
 	nproblems = assignment[3]
 	problems = assignment[4]
+	congrats = [line.strip() for line in open('congrats.txt','r')]
 	for name, email in students:
 		print "Grading student: "+name
 		results = []
@@ -42,8 +44,8 @@ def auto_grade():
 					except CalledProcessError as e:
 						reference = e.output
 					if cmp(submittal.replace(' ',''),reference.replace(' ','') )!= 0:
-						notes.append("Test Failed!")
 						notes.append("Test: "+test)
+						notes.append("Test Failed!")
 						notes.append("Your Code Produced: ")
 						notes.append(submittal)
 						notes.append("Solution Produced: ")
@@ -51,8 +53,8 @@ def auto_grade():
 						if grade > 0:
 							grade = grade / 2
 					else:
-						notes.append("Test Passed.")
 						notes.append("Test: "+test)
+						notes.append("Test Passed!")
 				results.append(notes)
 			else:
 				results.append(["Not Submitted"])
@@ -60,30 +62,38 @@ def auto_grade():
 			
 			grades.append(grade)
 		
-		#print results
-		# Now we want to actually write the grades (...)
-		#lines = [line.strip() for line in open(email+'/'+grade.txt,'r')]
-		#for result in results:
-			#for note in result:
-				#print note	
-		#print results
-		
 		update = []
+		a = 0
 		if os.path.exists(email+'/grade.txt'):
 			lines = [line.strip() for line in open(email+'/grade.txt','r')]
+			was_grade = 0
 			for line in lines:
 				is_grade = 0
+				if line.startswith("Grade:"):
+					tokens = line.split('/')
+					tokens.insert(1,' /')
+					tokens.insert(1,str(sum(grades)))
+					tokens = ''.join(tokens)
+					update.append(tokens)
+					is_grade = 1
 				for i in range(1, nproblems+1):
 					if line.startswith('Problem '+str(i)+":"):
-						print "found grade line "+str(i)
 						tokens = line.split('/')
 						tokens.insert(1,' /')
 						tokens.insert(1,str(grades[i-1]))
 						tokens = ''.join(tokens)
 						update.append(tokens)
 						is_grade = 1
+						was_grade = 1
 				if is_grade == 0:
 					update.append(line)
+					if was_grade == 1:
+						for note in results[a]:
+							update.append(note)
+						if grades[a] == problems[a]['value']:
+							update.append( '\n'+random.choice(congrats)+'\n' )
+						a += 1
+					was_grade = 0
 		f = open(email+"/grade.txt", 'w')
 		for line in update:
 			f.write(line+'\n')
