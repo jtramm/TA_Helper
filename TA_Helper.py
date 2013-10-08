@@ -99,7 +99,7 @@ def get_assignment():
 	return full_assignment
 
 # Compiles All Student Code
-def compile(students):
+def compile_subs(students):
 	grades = []
 	for name, email in students:
 		if os.path.exists(email):
@@ -256,32 +256,6 @@ def get_class_list():
 
 	return students
 
-def print_header( classname, HW):
-	print "==========================================="
-	print "================ TA HELPER ================"
-	print "==========================================="
-	print "             Class: "+classname
-	print "                Homework: "+str(HW)
-	print "==========================================="
-	return
-
-def get_task_choice():
-	print "Options:"
-	print "  1 - Generate Directories & grade.txt Files"
-	print "  2 - Download Student Submissions From Gmail"
-	print "  3 - Decompress Student Submission Files (.zip, .tar, .tgz)"
-	print "  4 - Accumulate Central Grade List"
-	print "  5 - Email grade.txt Files to Students"
-	print "  6 - Upload Grades to Google Docs"
-	print "  7 - Quit"
-	while(1):
-		choice = raw_input("Choose Task: ")
-		try:
-			i = int(choice)
-		except ValueError:
-			print "Invalid Choice. Please enter an integer."
-		else:
-			return i
 
 # Generates directory structure and grade.txt files
 def old_generate_directories(students, problems, points, classname, HW):
@@ -561,6 +535,35 @@ def email_grades(students):
 
 	return
 
+def print_header( classname, HW):
+	print "==========================================="
+	print "================ TA HELPER ================"
+	print "==========================================="
+	print "             Class: "+classname
+	print "                Homework: "+str(HW)
+	print "==========================================="
+	return
+
+def get_task_choice():
+	print "Options:"
+	print "  1 - Generate Directories & grade.txt Files"
+	print "  2 - Download Student Submissions From Gmail"
+	print "  3 - Decompress Student Submission Files (.zip, .tar, .tgz)"
+	print "  4 - Compile Student Submissions"
+	print "  5 - Grade Student Submissions"
+	print "  6 - Accumulate Central Grade List"
+	print "  7 - Email grade.txt Files to Students"
+	print "  8 - Upload Grades to Google Docs"
+	print "  9 - Quit"
+	while(1):
+		choice = raw_input("Choose Task: ")
+		try:
+			i = int(choice)
+		except ValueError:
+			print "Invalid Choice. Please enter an integer."
+		else:
+			return i
+
 # Central program loop
 students = get_students_from_gmail()
 print_header( classname, HW )
@@ -568,15 +571,14 @@ while( 1 ):
 
 	choice = get_task_choice()
 		
-	if choice == 1   :
-		#generate_directories( students, problems, points, classname, HW )
-		generate_directories( students, classname )
-
+	if choice == 1   : generate_directories( students, classname )
 	elif choice == 2 : download_emails( students )
 	elif choice == 3 : unzip_submissions()
-	elif choice == 4 : generate_grade_list( students )
-	elif choice == 5 : email_grades( students )
-	elif choice == 6 : upload_grades( students )
+	elif choice == 4 : compile_subs() 
+	elif choice == 5 : auto_grade()
+	elif choice == 6 : generate_grade_list( students )
+	elif choice == 7 : email_grades( students )
+	elif choice == 8 : upload_grades( students )
 	else :
 		print "Exiting!"
 		exit()
