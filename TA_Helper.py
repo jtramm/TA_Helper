@@ -10,12 +10,24 @@ from subprocess import call
 from subprocess import check_call
 
 ################################ Configuration  ################################
-classname = "CSPP51040"
 num_students = 35 
 spreadsheet_name = 'CSPP51040 Grades'
-HW = 1
 ################################################################################
 
+# Compiles All Student Code
+def compile_subs(students):
+	grades = []
+	for name, email in students:
+		if os.path.exists(email):
+			for i in range(1,11):
+				if os.path.exists(email+'/p'+str(i)):
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/p'+str(i)+'.c'])
+				else:
+					print "No p"+str(i)+".c found for student "+email
+					exit(5)
+	return
+
+# Get Assignment Details from input File
 def get_assignment():
 
 	if not os.path.exists('problems.dat'):
@@ -25,6 +37,10 @@ def get_assignment():
 	lines = [line.strip() for line in open("problems.dat",'r')]
 
 	n = 0 #line number
+
+	classname = lines[n].split('=')
+	classname = classname[1].split()[0]
+	n += 1
 
 	# Assignment Type
 	assignment = lines[n].split('=')
@@ -94,23 +110,9 @@ def get_assignment():
 	#	for t in p['tests']:
 	#		print t
 	
-	full_assignment = assignment, anumber, nproblems, problems 
+	full_assignment = classname, assignment, anumber, nproblems, problems 
 
 	return full_assignment
-
-# Compiles All Student Code
-def compile_subs(students):
-	grades = []
-	for name, email in students:
-		if os.path.exists(email):
-			for i in range(1,11):
-				if os.path.exists(email+'/p'+str(i)):
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/p'+str(i)+'.c'])
-				else:
-					print "No p"+str(i)+".c found for student "+email
-					exit(5)
-	return
-
 
 	
 # Uploads grades to google docs spreadsheet
@@ -289,11 +291,12 @@ def old_generate_directories(students, problems, points, classname, HW):
 
 # IMPROVED Generates directory structure and grade.txt files
 def generate_directories(students, classname):
-	assignment = get_assignment()
-	atype = assignment[0]
-	anumber = assignment[1]
-	nproblems = assignment[2]
-	problems = assignment[3]
+
+	classname = assignment[0]
+	atype = assignment[1]
+	anumber = assignment[2]
+	nproblems = assignment[3]
+	problems = assignment[4]
 
 	points = 0
 	for p in problems:
@@ -535,12 +538,15 @@ def email_grades(students):
 
 	return
 
-def print_header( classname, HW):
+def print_header():
+	classname = assignment[0]
+	atype =  assignment[1]
+	anum = assignment[2]
 	print "==========================================="
 	print "================ TA HELPER ================"
 	print "==========================================="
 	print "             Class: "+classname
-	print "                Homework: "+str(HW)
+	print "                "+atype+": "+str(anum)
 	print "==========================================="
 	return
 
@@ -566,7 +572,8 @@ def get_task_choice():
 
 # Central program loop
 students = get_students_from_gmail()
-print_header( classname, HW )
+assignment = get_assignment()
+print_header( )
 while( 1 ):
 
 	choice = get_task_choice()
