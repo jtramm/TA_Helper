@@ -23,6 +23,9 @@ column_name = 'HW1'
 # Auto-Grade
 # Need to have some allowance for differences in whitespace I think....
 def auto_grade():
+	confirm = raw_input("Execute Auto-Grade (y/n)? ")
+	if confirm != 'y':
+		return
 	nproblems = assignment[3]
 	problems = assignment[4]
 	congrats = [line.strip() for line in open('congrats.txt','r')]
@@ -50,11 +53,11 @@ def auto_grade():
 						notes.append(submittal)
 						notes.append("Solution Produced: ")
 						notes.append(reference)
-						if grade > 0:
-							grade = grade / 2
+						if grade == problem['value']:
+							grade = problem['value'] / 2
 					else:
 						notes.append("Test: "+test)
-						notes.append("Test Passed!")
+						notes.append("Test Passed!\n")
 				results.append(notes)
 			else:
 				results.append(["Not Submitted"])
