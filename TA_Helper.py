@@ -21,6 +21,19 @@ num_students = 37
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
+def add_note_to_grade(addr, note, problem):		
+	update = []
+	if os.path.exists(addr+'/grade.txt'):
+		lines = [line.strip() for line in open(addr+'/grade.txt','r')]
+		was_grade = 0
+		for line in lines:
+			update.append(line)
+			if line.startswith('Problem '+str(problem)+":"):
+				update.append('\n'+note+'\n')
+	f = open(addr+"/grade.txt", 'w')
+	for line in update:
+		f.write(line+'\n')
+	f.close()
 
 class Command(object):
 	output = ''
@@ -139,23 +152,29 @@ def auto_grade():
 
 # Compiles All Student Code
 def compile_subs():
-
-	# compiles
 	grades = []
 	nproblems = assignment[3]
 	problems = assignment[4]
 	for name, email in students:
 		if os.path.exists(email[0]):
+			print "compiling submission from: "+name
 			i = 1
 			for p in problems:
 				if os.path.exists(email[0]+'/'+p['fname']):
 					if os.path.exists(email[0]+'/p'+str(i)):
-						subprocess.call(['rm', '-r', email[0]+'/*/'])
-						print "had to delete some files for : "+email[0]
-					subprocess.call(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']])
+						if not os.path.exists(email[0]+'/old_files'):
+							subprocess.call(['mkdir', email[0]+'/old_files'])
+						subprocess.call(['mv', email[0]+'/p'+str(i), email[0]+'/old_files'])
+					try:
+						compilation = subprocess.check_output(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']], stderr=subprocess.STDOUT)
+					except subprocess.CalledProcessError as e:
+						compilation = e.output
+					if compilation != '':
+						compilation = 'There were errors and warnings during compilation:\n'+compilation
+						add_note_to_grade(email[0], compilation, i)
 					i += 1
-				else:
-					print "No "+p['fname']+" found for student "+email[0]
+				#else:
+					#print "No "+p['fname']+" found for student "+email[0]
 	return
 
 # Get Assignment Details from input File
@@ -587,7 +606,7 @@ def generate_grade_list():
 			lines = [line.strip() for line in open(email[0]+"/grade.txt",'r')]
 			for line in lines:
 				if line.find("Grade:") == 0:
-					grades.append(name+"\t\t"+line.lstrip("Grade:"))
+					grades.append(name.ljust(25)+" "+line.lstrip("Grade:"))
 		else:
 			print "ERROR! Student: "+email[0]+" Not Found!\n"
 			exit()
