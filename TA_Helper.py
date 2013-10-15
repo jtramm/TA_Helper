@@ -15,7 +15,7 @@ from subprocess import check_output
 from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
-num_students = 35 
+num_students = 37 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
@@ -35,11 +35,11 @@ def auto_grade():
 		grades = []
 		for problem in problems:
 			grade = problem['value']
-			if os.path.exists(email+'/'+problem['fname']):
+			if os.path.exists(email[0]+'/'+problem['fname']):
 				notes = []
 				for test in problem['tests']:
 					try:
-						submittal = check_output([email+'/'+test], shell=True)
+						submittal = check_output([email[0]+'/'+test], shell=True)
 					except CalledProcessError as e:
 						submittal = e.output
 					try:
@@ -67,8 +67,8 @@ def auto_grade():
 		
 		update = []
 		a = 0
-		if os.path.exists(email+'/grade.txt'):
-			lines = [line.strip() for line in open(email+'/grade.txt','r')]
+		if os.path.exists(email[0]+'/grade.txt'):
+			lines = [line.strip() for line in open(email[0]+'/grade.txt','r')]
 			was_grade = 0
 			for line in lines:
 				is_grade = 0
@@ -97,25 +97,25 @@ def auto_grade():
 							update.append( '\n'+random.choice(congrats)+'\n' )
 						a += 1
 					was_grade = 0
-		f = open(email+"/grade.txt", 'w')
+		f = open(email[0]+"/grade.txt", 'w')
 		for line in update:
 			f.write(line+'\n')
 		f.close()
 
 # Compiles All Student Code
-def compile_subs(students):
+def compile_subs():
 	grades = []
 	nproblems = assignment[3]
 	problems = assignment[4]
-	for name, email in students:
-		if os.path.exists(email):
+	for name, email[0] in students:
+		if os.path.exists(email[0]):
 			i = 1
 			for p in problems:
-				if os.path.exists(email+'/'+p['fname']):
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email+'/p'+str(i), email+'/'+p['fname']])
+				if os.path.exists(email[0]+'/'+p['fname']):
+					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']])
 					i += 1
 				else:
-					print "No "+p['fname']+" found for student "+email
+					print "No "+p['fname']+" found for student "+email[0]
 	return
 
 # Get Assignment Details from input File
@@ -207,7 +207,7 @@ def get_assignment():
 
 	
 # Uploads grades to google docs spreadsheet
-def upload_grades( students ):
+def upload_grades():
 	try: import gspread
 	except ImportError:
 		print "Install gpsread library (on github @ https://github.com/burnash/gspread)"
@@ -221,15 +221,15 @@ def upload_grades( students ):
 	
 	grades = []
 	for name, email in students:
-		if os.path.exists(email):
-			lines = [line.strip() for line in open(email+"/grade.txt",'r')]
+		if os.path.exists(email[0]):
+			lines = [line.strip() for line in open(email[0]+"/grade.txt",'r')]
 			for line in lines:
 				if line.find("Grade:") == 0:
 					grade = line.lstrip("Grade:")
 					words = grade.rsplit('/');
 					grades.append(words[0])
 		else:
-			print "ERROR! Student: "+email+" Not Found!\n"
+			print "ERROR! Student: "+email[0]+" Not Found!\n"
 			print "grades not uploaded..."
 			return
 	
@@ -245,6 +245,8 @@ def upload_grades( students ):
 
 # Gets the class list from google spreadsheet
 def get_students_from_gmail( ):
+
+	# This portion downloads from the spreadsheet
 	try: import gspread
 	except ImportError:
 		print "Install gpsread library (on github @ https://github.com/burnash/gspread)"
@@ -277,7 +279,11 @@ def get_students_from_gmail( ):
 	for cell in cell_list:
 		emails.append(cell.value)
 	
-	students = zip(names, emails)
+	tokenized_emails = []
+	for email in emails:
+		tokenized_emails.append(email.split(' '))	
+	
+	students = zip(names, tokenized_emails)
 
 	return students
 
@@ -329,7 +335,7 @@ def unzip_submissions():
 	
 	# Summon All submission to top level student directories
 	for name, email in students:
-		dir_to_flatten = email 
+		dir_to_flatten = email[0] 
 		for dirpath, dirnames, filenames in os.walk(dir_to_flatten):
 			for filename in filenames:
 				if filename.endswith(".c"):
@@ -362,7 +368,7 @@ def get_class_list():
 	return students
 
 # IMPROVED Generates directory structure and grade.txt files
-def generate_directories(students):
+def generate_directories():
 
 	classname = assignment[0]
 	atype = assignment[1]
@@ -377,15 +383,15 @@ def generate_directories(students):
 
 
 	for name, email in students:
-		if not os.path.exists(email):
-			os.makedirs(email)
-		fp = open(email+"/grade.txt", 'w')
+		if not os.path.exists(email[0]):
+			os.makedirs(email[0])
+		fp = open(email[0]+"/grade.txt", 'w')
 		for i in range(1,70):
 			fp.write("#")
 		fp.write("\n")
 		fp.write("Grade:  / "+str(points)+"\n")
 		fp.write("Student: "+name+"\n")
-		fp.write("Email: "+email+"\n")
+		fp.write("Email: "+email[0]+"\n")
 		fp.write("Class: "+classname+"\n")
 		fp.write(atype+': '+str(anumber)+"\n")
 		for i in range(1,70):
@@ -405,7 +411,7 @@ def generate_directories(students):
 	return
 
 #Download emails
-def download_emails( students ):
+def download_emails():
 	
 	# Get gmail credentials
 	user = get_credentials()
@@ -473,11 +479,21 @@ def download_emails( students ):
 				print "ERROR - QUitting"
 				exit(1)
 
-			if not os.path.exists(student):
+			# New checks against students
+			found = 0
+			for s_name, s_email in students:
+				for s_email_token in s_email:
+					if student == s_email_token:
+						found = 1
+						student = s_email[0]
+
+			if found == 0:
+			# Original checks against dir structure
+			#if not os.path.exists(student):
 				print student+" not found. Select student to assign to: "
 				it = 0
 				for name, addr in students:
-					print str(it)+". "+name+" <"+addr+">"
+					print str(it)+". "+name+" <"+' '.join(addr)+">"
 					it = it + 1
 				print str(it)+". Not Listed - quit"
 				print str(it+1)+". Not Listed - discard submission"
@@ -490,12 +506,15 @@ def download_emails( students ):
 					print "Skipping..."
 					continue
 				else:
-					student = students[int(choice)][1]
+					student = students[int(choice)][1][0]
 					submitted[int(choice)] = 1
+					# Now we need to write back to the gmail file.... YIKES!
+					# For now, we can just manually add these in....
+					#add_student_email(student)
 			else:
 				ita = 0
 				for name, addr in students:
-					if addr == student:
+					if addr[0] == student:
 						submitted[ita] = 1
 					ita = ita + 1
 
@@ -504,12 +523,13 @@ def download_emails( students ):
 			fp = open(path, 'wb')
 			fp.write(part.get_payload(decode=1))
 			fp.close
+			print student+"'s submission received"
 			#time.sleep(5)
 
 	# write out the subs.txt file to keep track of missing submissions
 	ita = 0
 	for name, addr in students:
-		subs.write(name+" <"+addr+"> :")
+		subs.write(name+" <"+addr[0]+"> :")
 		if submitted[ita] == 1:
 			subs.write(" RECEIVED")
 		ita = ita + 1
@@ -520,16 +540,16 @@ def download_emails( students ):
 	return
 
 # Creates a centralized grades list (grade.txt)
-def generate_grade_list(students):
+def generate_grade_list():
 	grades = []
 	for name, email in students:
-		if os.path.exists(email):
-			lines = [line.strip() for line in open(email+"/grade.txt",'r')]
+		if os.path.exists(email[0]):
+			lines = [line.strip() for line in open(email[0]+"/grade.txt",'r')]
 			for line in lines:
 				if line.find("Grade:") == 0:
 					grades.append(name+"\t\t"+line.lstrip("Grade:"))
 		else:
-			print "ERROR! Student: "+email+" Not Found!\n"
+			print "ERROR! Student: "+email[0]+" Not Found!\n"
 			exit()
 
 	fp = open(column_name+"_grades.txt", "w")
@@ -541,7 +561,7 @@ def generate_grade_list(students):
 	return
 
 # Email grade.txt files to students
-def email_grades(students):
+def email_grades():
 	# Get Gmail account credentials
 	user = get_credentials()
 	user_email_address = user[0]
@@ -550,10 +570,10 @@ def email_grades(students):
 	# Read in scripts
 	scripts = []
 	for name, email in students:
-		if os.path.exists(email):
-			fp = open(email+"/grade.txt",'r')
+		if os.path.exists(email[0]):
+			fp = open(email[0]+"/grade.txt",'r')
 			script = "Subject: "+classname+" HW"+str(HW)+" Grade\n"
-			script = script + "To: "+email+"\n"
+			script = script + "To: "+email[0]+"\n"
 			scripts.append(script+fp.read())
 
 	# Check that names / emails / scripts are in sync
@@ -564,10 +584,10 @@ def email_grades(students):
 		for line in lines:
 			if line.find("Student:") != -1 and line.find(name) != -1:
 				ok = ok + 1
-			if line.find("Email:") != -1 and line.find(email) != -1:
+			if line.find("Email:") != -1 and line.find(email[0]) != -1:
 				ok = ok + 1
 		if ok != 2:
-			print name+" ("+email+") is NOT synced!"
+			print name+" ("+email[0]+") is NOT synced!"
 			exit()
 		i = i + 1
 
@@ -584,8 +604,8 @@ def email_grades(students):
 		if really == 'y':
 			i = 0  
 			for name, email in students:
-				server.sendmail(user_email_address, email, scripts[i])  
-				print name+"'s script has been sent to "+email
+				server.sendmail(user_email_address, email[0], scripts[i])  
+				print name+"'s script has been sent to "+email[0]
 				i = i + 1
 			server.quit()  
 			return
@@ -599,8 +619,8 @@ def email_grades(students):
 		for name, email in students:
 			approval = raw_input("Send Grade to "+name+"? (y/n): ")
 			if approval == 'y':
-				server.sendmail(user_email_address, email, scripts[i])  
-				print name+"'s script has been sent to "+email
+				server.sendmail(user_email_address, email[0], scripts[i])  
+				print name+"'s script has been sent to "+email[0]
 			else:
 				print "Skipping "+name+"..."
 			i = i + 1
@@ -650,14 +670,14 @@ while( 1 ):
 
 	choice = get_task_choice()
 		
-	if choice == 1   : generate_directories( students )
-	elif choice == 2 : download_emails( students )
+	if choice == 1   : generate_directories( )
+	elif choice == 2 : download_emails( )
 	elif choice == 3 : unzip_submissions()
-	elif choice == 4 : compile_subs(students) 
+	elif choice == 4 : compile_subs( ) 
 	elif choice == 5 : auto_grade()
-	elif choice == 6 : generate_grade_list( students )
-	elif choice == 7 : email_grades( students )
-	elif choice == 8 : upload_grades( students )
+	elif choice == 6 : generate_grade_list( )
+	elif choice == 7 : email_grades( )
+	elif choice == 8 : upload_grades( )
 	else :
 		print "Exiting!"
 		exit()
