@@ -44,6 +44,7 @@ class Command(object):
 			print 'Terminating process'
 			self.process.terminate()
 			thread.join()
+			return '(Your code never returned anything)'
 
 		return self.output
 
@@ -80,7 +81,7 @@ def auto_grade():
 						reference = e.output
 					if cmp(submittal.replace(' ',''),reference.replace(' ','') )!= 0:
 						notes.append("Test: "+test)
-						notes.append("Test Failed!")
+						notes.append("Test Failed.")
 						notes.append("Your Code Produced: ")
 						notes.append(submittal)
 						notes.append("Solution Produced: ")
@@ -147,9 +148,9 @@ def compile_subs():
 			for p in problems:
 				if os.path.exists(email[0]+'/'+p['fname']):
 					if os.path.exists(email[0]+'/p'+str(i)):
-						call(['rm', '-r', email[0]+'/*/'])
+						subprocess.call(['rm', '-r', email[0]+'/*/'])
 						print "had to delete some files for : "+email[0]
-					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']])
+					subprocess.call(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']])
 					i += 1
 				else:
 					print "No "+p['fname']+" found for student "+email[0]
@@ -359,16 +360,16 @@ def unzip_submissions():
 			if f.endswith(".zip"):
 				print message
 				cmd = 'unzip -u -d '+dirname+' '+obj+' > /dev/null'
-				call(cmd, shell=True)
+				subprocess.call(cmd, shell=True)
 			elif f.endswith(".tar.gz") or f.endswith(".tgz"):
 				print message
-				call(['tar','-xzf',obj, '-C', dirname])
+				subprocess.call(['tar','-xzf',obj, '-C', dirname])
 			elif f.endswith(".tar"):
 				print message
-				call(['tar','-xf',obj, '-C', dirname])
+				subprocess.call(['tar','-xf',obj, '-C', dirname])
 			elif f.endswith(".rar"):
 				print message
-				call(['unrar','e',obj,dirname])
+				subprocess.call(['unrar','e',obj,dirname])
 	
 	# Summon All submission to top level student directories
 	for name, email in students:
