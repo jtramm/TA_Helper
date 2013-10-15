@@ -87,6 +87,8 @@ def auto_grade():
 						notes.append("Solution Produced: ")
 						notes.append(reference)
 						if grade == problem['value']:
+							grade = (3* problem['value']) / 4
+						elif grade == (3* problem['value']) / 4:
 							grade = problem['value'] / 2
 					else:
 						notes.append("Test: "+test)
