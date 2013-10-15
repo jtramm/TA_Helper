@@ -21,6 +21,82 @@ num_students = 37
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
+
+# Gets and Stores User Credentials
+def get_credentials():
+	found = 1
+	try:
+		with open('credentials.dat'): pass
+	except IOError:
+		print "credentials.dat file not found"
+		found = 0
+	if found == 0:
+		user_email_address = raw_input("Gmail Address: ")
+		password = getpass.getpass()
+		save = raw_input("Credentials gathered. Would you like to encode & save them? (y/n): ")
+		if save == "y":
+			cred = open('credentials.dat', 'w')
+			cred.write(base64.b64encode(user_email_address))
+			cred.write('\n')
+			cred.write(base64.b64encode(password))
+			cred.close()
+	if found == 1:
+		cred = open('credentials.dat', 'r')
+		user_email_address = base64.b64decode(cred.readline())
+		password = base64.b64decode(cred.readline())
+	user = [user_email_address, password]
+	return user
+
+# Email grade.txt files to students
+def email_submission_status():
+	# Get Gmail account credentials
+	user = get_credentials()
+	user_email_address = user[0]
+	password = user[1]
+
+	# Generate Emails
+	i = 0
+	notes = []
+	lines = [line.strip() for line in open('subs.txt')]
+	for line in lines:
+		tokens = line.split()
+		email = [s for s in tokens if "@" in s][0]
+		if "RECEIVED" in tokens:
+			message = "I have received your homework submission.\n"
+		else:
+			message = "I have not received your homework submission yet. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
+
+		script = "Subject: "+assignment[0]+" "+column_name+" Submission Status\n"
+		script = script + "To: "+email+"\n\n"
+		script = script + message
+		notes.append([email, script])
+	
+	# Email Out Grades
+	username = user_email_address
+	server = smtplib.SMTP('smtp.gmail.com:587')  
+	server.starttls()  
+	server.login(username,password)
+	
+	# Give user option to send emails to everyone
+	yes = raw_input("Send submission notifications to ALL students? (y/n): ")
+	if yes == 'y':
+		really = raw_input("Are you SURE? (y/n): ")
+		if really == 'y':
+			for note in notes:
+				server.sendmail(user_email_address, note[0], note[1])  
+				print "Submission notification sent to: "+note[0]
+			server.quit()  
+			return
+		else:
+			print "OK, not doing anything"
+			server.quit()  
+			return
+	
+	server.quit()  
+	print "All requested Emails have been sent!\n"
+	return
+
+
 def add_note_to_grade(addr, note, problem):		
 	update = []
 	if os.path.exists(addr+'/grade.txt'):
@@ -44,7 +120,7 @@ class Command(object):
 	def run(self, timeout):
 		def target():
 			#print 'Thread started'
-			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, shell=True)
+			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 			#output = self.process.stdout.read()
 			self.output = self.process.communicate()[0]
 			#print 'Thread finished'
@@ -346,30 +422,6 @@ def get_students_from_gmail( ):
 
 	return students
 
-# Gets and Stores User Credentials
-def get_credentials():
-	found = 1
-	try:
-		with open('credentials.dat'): pass
-	except IOError:
-		print "credentials.dat file not found"
-		found = 0
-	if found == 0:
-		user_email_address = raw_input("Gmail Address: ")
-		password = getpass.getpass()
-		save = raw_input("Credentials gathered. Would you like to encode & save them? (y/n): ")
-		if save == "y":
-			cred = open('credentials.dat', 'w')
-			cred.write(base64.b64encode(user_email_address))
-			cred.write('\n')
-			cred.write(base64.b64encode(password))
-			cred.close()
-	if found == 1:
-		cred = open('credentials.dat', 'r')
-		user_email_address = base64.b64decode(cred.readline())
-		password = base64.b64decode(cred.readline())
-	user = [user_email_address, password]
-	return user
 
 # Decompresses submissions
 def unzip_submissions():
@@ -588,7 +640,7 @@ def download_emails():
 	# write out the subs.txt file to keep track of missing submissions
 	ita = 0
 	for name, addr in students:
-		subs.write(name+" <"+addr[0]+"> :")
+		subs.write(name.ljust(30)+" "+addr[0].ljust(30)+" ")
 		if submitted[ita] == 1:
 			subs.write(" RECEIVED")
 		ita = ita + 1
@@ -631,7 +683,7 @@ def email_grades():
 	for name, email in students:
 		if os.path.exists(email[0]):
 			fp = open(email[0]+"/grade.txt",'r')
-			script = "Subject: "+classname+" HW"+str(HW)+" Grade\n"
+			script = "Subject: "+assignment[0]+" "+column_name+" Grade\n"
 			script = script + "To: "+email[0]+"\n"
 			scripts.append(script+fp.read())
 
@@ -705,13 +757,14 @@ def get_task_choice():
 	print "Options:"
 	print "  1 - Generate Directories & grade.txt Files"
 	print "  2 - Download Student Submissions From Gmail"
-	print "  3 - Decompress Student Submission Files (.zip, .tar, .tgz)"
-	print "  4 - Compile Student Submissions"
-	print "  5 - Grade Student Submissions"
-	print "  6 - Accumulate Central Grade List"
-	print "  7 - Email grade.txt Files to Students"
-	print "  8 - Upload Grades to Google Docs"
-	print "  9 - Quit"
+	print "  3 - Email Submissinon Confimratino notes to all students"
+	print "  4 - Decompress Student Submission Files (.zip, .tar, .tgz)"
+	print "  5 - Compile Student Submissions"
+	print "  6 - Grade Student Submissions"
+	print "  7 - Accumulate Central Grade List"
+	print "  8 - Email grade.txt Files to Students"
+	print "  9 - Upload Grades to Google Docs"
+	print "  10 - Quit"
 	while(1):
 		choice = raw_input("Choose Task: ")
 		try:
@@ -731,12 +784,13 @@ while( 1 ):
 		
 	if choice == 1   : generate_directories( )
 	elif choice == 2 : download_emails( )
-	elif choice == 3 : unzip_submissions()
-	elif choice == 4 : compile_subs( ) 
-	elif choice == 5 : auto_grade()
-	elif choice == 6 : generate_grade_list( )
-	elif choice == 7 : email_grades( )
-	elif choice == 8 : upload_grades( )
+	elif choice == 3 : email_submission_status()
+	elif choice == 4 : unzip_submissions()
+	elif choice == 5 : compile_subs( ) 
+	elif choice == 6 : auto_grade()
+	elif choice == 7 : generate_grade_list( )
+	elif choice == 8 : email_grades( )
+	elif choice == 9 : upload_grades( )
 	else :
 		print "Exiting!"
 		exit()
