@@ -39,6 +39,7 @@ def auto_grade():
 				notes = []
 				for test in problem['tests']:
 					try:
+						# This needs to timeout somehow...
 						submittal = check_output([email[0]+'/'+test], shell=True)
 					except CalledProcessError as e:
 						submittal = e.output
@@ -104,14 +105,19 @@ def auto_grade():
 
 # Compiles All Student Code
 def compile_subs():
+
+	# compiles
 	grades = []
 	nproblems = assignment[3]
 	problems = assignment[4]
-	for name, email[0] in students:
+	for name, email in students:
 		if os.path.exists(email[0]):
 			i = 1
 			for p in problems:
 				if os.path.exists(email[0]+'/'+p['fname']):
+					if os.path.exists(email[0]+'/p'+str(i)):
+						call(['rm', '-r', email[0]+'/*/'])
+						print "had to delete some files for : "+email[0]
 					call(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']])
 					i += 1
 				else:
