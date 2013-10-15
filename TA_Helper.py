@@ -9,16 +9,44 @@ import getpass
 import base64
 import fileinput
 import random
-from subprocess import call
-from subprocess import check_call
-from subprocess import check_output
-from subprocess import CalledProcessError
+import subprocess
+import threading
+#from subprocess import call
+#from subprocess import check_call
+#from subprocess import check_output
+#from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
 num_students = 37 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
+
+class Command(object):
+	output = ''
+	def __init__(self, cmd):
+		self.cmd = cmd
+		self.process = None
+
+	def run(self, timeout):
+		def target():
+			#print 'Thread started'
+			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, shell=True)
+			#output = self.process.stdout.read()
+			self.output = self.process.communicate()[0]
+			#print 'Thread finished'
+
+		thread = threading.Thread(target=target)
+		thread.start()
+
+		thread.join(timeout)
+		if thread.is_alive():
+			print 'Terminating process'
+			self.process.terminate()
+			thread.join()
+
+		return self.output
+
 
 # Auto-Grade
 # Need to have some allowance for differences in whitespace I think....
@@ -40,12 +68,15 @@ def auto_grade():
 				for test in problem['tests']:
 					try:
 						# This needs to timeout somehow...
-						submittal = check_output([email[0]+'/'+test], shell=True)
-					except CalledProcessError as e:
+						run_call = email[0]+'/'+test
+						command = Command(run_call)
+						submittal = command.run(timeout=3)
+						#submittal = check_output([email[0]+'/'+test], shell=True)
+					except subprocess.CalledProcessError as e:
 						submittal = e.output
 					try:
-						reference = check_output(['./'+test], shell=True)
-					except CalledProcessError as e:
+						reference = subprocess.check_output(['./'+test], shell=True)
+					except subprocess.CalledProcessError as e:
 						reference = e.output
 					if cmp(submittal.replace(' ',''),reference.replace(' ','') )!= 0:
 						notes.append("Test: "+test)
