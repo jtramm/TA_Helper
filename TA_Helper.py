@@ -17,7 +17,7 @@ import threading
 #from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
-num_students = 37 
+num_students = 34 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
@@ -77,14 +77,14 @@ def email_submission_status():
 		script = script + message
 		notes.append([email, script])
 	
-	# Email Out Grades
+	# Connect to Email server
 	username = user_email_address
 	server = smtplib.SMTP('smtp.gmail.com:587')  
 	server.starttls()  
 	server.login(username,password)
 	
 	# Give user option to send emails to everyone
-	yes = raw_input("Send submission notifications to ALL students? (y/n): ")
+	yes = raw_input("This script will email all students who have not yet been notified, or have still yet to submit.\nProceed? (y/n): ")
 	if yes == 'y':
 		really = raw_input("Are you SURE? (y/n): ")
 		if really == 'y':
