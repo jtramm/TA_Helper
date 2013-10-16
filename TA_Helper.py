@@ -17,7 +17,7 @@ import threading
 #from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
-num_students = 34 
+num_students = 35 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
@@ -190,7 +190,10 @@ def auto_grade():
 						notes.append("Test: "+test)
 						notes.append("Test Failed.")
 						notes.append("Your Code Produced: ")
-						notes.append(submittal)
+						if len(submittal) > 2000:
+							notes.append('(output was garbled or way too long to print)')
+						else:
+							notes.append(submittal)
 						notes.append("Solution Produced: ")
 						notes.append(reference)
 						if grade == problem['value']:
