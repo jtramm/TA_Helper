@@ -246,9 +246,7 @@ def compile_subs():
 			for p in problems:
 				if os.path.exists(email[0]+'/'+p['fname']):
 					if os.path.exists(email[0]+'/p'+str(i)):
-						if not os.path.exists(email[0]+'/old_files'):
-							subprocess.call(['mkdir', email[0]+'/old_files'])
-						subprocess.call(['mv', email[0]+'/p'+str(i), email[0]+'/old_files'])
+						subprocess.call(['rm','-rf',email[0]+'/p'+str(i)])
 					try:
 						compilation = subprocess.check_output(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']], stderr=subprocess.STDOUT)
 					except subprocess.CalledProcessError as e:
