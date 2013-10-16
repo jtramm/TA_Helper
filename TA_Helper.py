@@ -54,6 +54,8 @@ def email_submission_status():
 	user_email_address = user[0]
 	password = user[1]
 
+	update = []
+
 	# Generate Emails
 	i = 0
 	notes = []
@@ -61,11 +63,15 @@ def email_submission_status():
 	for line in lines:
 		tokens = line.split()
 		email = [s for s in tokens if "@" in s][0]
+		if "NOTIFIED" in tokens:
+			update.append(line)
+			continue
 		if "RECEIVED" in tokens:
 			message = "I have received your homework submission.\n"
+			update.append(line+"    NOTIFIED")
 		else:
-			message = "I have not received your homework submission yet. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
-
+			message = "I have not received your homework submission yet. As a reminder, it is due today at 5:00 PM, and will not be accepted after that time. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
+			update.append(line)
 		script = "Subject: "+assignment[0]+" "+column_name+" Submission Status\n"
 		script = script + "To: "+email+"\n\n"
 		script = script + message
@@ -86,14 +92,18 @@ def email_submission_status():
 				server.sendmail(user_email_address, note[0], note[1])  
 				print "Submission notification sent to: "+note[0]
 			server.quit()  
-			return
 		else:
 			print "OK, not doing anything"
 			server.quit()  
 			return
 	
-	server.quit()  
 	print "All requested Emails have been sent!\n"
+
+	fp = open("subs.txt", "w")
+	for line in update:
+		fp.write(line+"\n")
+	fp.close()
+
 	return
 
 
