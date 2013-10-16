@@ -144,10 +144,18 @@ def auto_grade():
 	confirm = raw_input("Execute Auto-Grade (y/n)? ")
 	if confirm != 'y':
 		return
+	all_students = raw_input("Grade all Students, or just some (all/some)? ")
+	if all_students != 'all' and all_students != 'some':
+		return
 	nproblems = assignment[3]
 	problems = assignment[4]
 	congrats = [line.strip() for line in open('congrats.txt','r')]
 	for name, email in students:
+		if all_students == 'some':
+			grade_student = raw_input("Grade student: "+name+"? (y/n): ")
+			if grade_student != 'y':
+				print "Skipping student: "+name
+				continue
 		print "Grading student: "+name
 		results = []
 		grades = []
