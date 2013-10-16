@@ -1,7 +1,7 @@
 TO DO LIST FOR TA_HELPER
 =====================================================================
 
-- Need to add multiple email addresses per student functionality.
+X - Need to add multiple email addresses per student functionality.
 
 - Remove all configurations from source, so updates can carry
 over more easily, aren't all mangled in different directories. This
