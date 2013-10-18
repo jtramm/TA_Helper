@@ -11,67 +11,12 @@ import fileinput
 import random
 import subprocess
 import threading
-#import tempfile
-#from subprocess import call
-#from subprocess import check_call
-#from subprocess import check_output
-#from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
 num_students = 35 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW1'
 ################################################################################
-
-# Automated vim hopper for faster sight checking
-def sight_check():
-
-	if os.path.exists('grading_status.txt'):
-		lines = [line.strip() for line in open('grading_status.txt')]
-	else:
-		lines = []
-		i = 0
-		for name, email in students:
-			lines.append( str(i).ljust(2)+": "+name.ljust(25) )
-			i += 1
-	
-	while(1):
-		print "Let's do some grading!"
-		print "Students:"
-		i = 0
-		for student in lines:
-			print student
-			i += 1
-		print str(i).ljust(2)+": Return to Main Menu"
-
-		choice = raw_input("Select Student: ")
-		if choice == str(i):
-			fp = open('grading_status.txt', 'w')
-			for line in lines:
-				fp.write(line+'\n')
-			fp.close()
-
-			return
-
-		name, email = students[int(choice)]
-
-		p = email[0]
-		
-		cmd = ['vim', '-p']
-		cmd.append(p+'/grade.txt')
-		for problem in assignment[4]:
-			if os.path.exists(p+'/'+problem['fname']):
-				cmd.append(p+'/'+problem['fname'])
-
-		subprocess.call(cmd)
-
-		if raw_input("Mark as Graded? (y/n): ") == 'y':
-			lines[int(choice)]+=' GRADED'
-
-		
-		print "editing complete!"
-
-	#lines = [line.strip() for line in open(t.name)]
 
 # Gets and Stores User Credentials
 def get_credentials():
@@ -98,79 +43,6 @@ def get_credentials():
 	user = [user_email_address, password]
 	return user
 
-# Email grade.txt files to students
-def email_submission_status():
-	# Get Gmail account credentials
-	user = get_credentials()
-	user_email_address = user[0]
-	password = user[1]
-
-	update = []
-
-	# Generate Emails
-	i = 0
-	notes = []
-	lines = [line.strip() for line in open('subs.txt')]
-	for line in lines:
-		tokens = line.split()
-		email = [s for s in tokens if "@" in s][0]
-		if "NOTIFIED" in tokens:
-			update.append(line)
-			continue
-		if "RECEIVED" in tokens:
-			message = "I have received your homework submission.\n"
-			update.append(line+"    NOTIFIED")
-		else:
-			message = "I have not received your homework submission yet. As a reminder, it is due today at 5:00 PM, and will not be accepted after that time. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
-			update.append(line)
-		script = "Subject: "+assignment[0]+" "+column_name+" Submission Status\n"
-		script = script + "To: "+email+"\n\n"
-		script = script + message
-		notes.append([email, script])
-	
-	# Connect to Email server
-	username = user_email_address
-	server = smtplib.SMTP('smtp.gmail.com:587')  
-	server.starttls()  
-	server.login(username,password)
-	
-	# Give user option to send emails to everyone
-	yes = raw_input("This script will email all students who have not yet been notified, or have still yet to submit.\nProceed? (y/n): ")
-	if yes == 'y':
-		really = raw_input("Are you SURE? (y/n): ")
-		if really == 'y':
-			for note in notes:
-				server.sendmail(user_email_address, note[0], note[1])  
-				print "Submission notification sent to: "+note[0]
-			server.quit()  
-		else:
-			print "OK, not doing anything"
-			server.quit()  
-			return
-	
-	print "All requested Emails have been sent!\n"
-
-	fp = open("subs.txt", "w")
-	for line in update:
-		fp.write(line+"\n")
-	fp.close()
-
-	return
-
-
-def add_note_to_grade(addr, note, problem):		
-	update = []
-	if os.path.exists(addr+'/grade.txt'):
-		lines = [line.strip() for line in open(addr+'/grade.txt','r')]
-		was_grade = 0
-		for line in lines:
-			update.append(line)
-			if line.startswith('Problem '+str(problem)+":"):
-				update.append('\n'+note+'\n')
-	f = open(addr+"/grade.txt", 'w')
-	for line in update:
-		f.write(line+'\n')
-	f.close()
 
 class Command(object):
 	output = ''
@@ -831,11 +703,10 @@ def get_task_choice():
 	print "  4 - Decompress Student Submission Files (.zip, .tar, .tar.gz, .tgz)"
 	print "  5 - Compile Student Submissions"
 	print "  6 - Grade Student Submissions"
-	print "  7 - Sight Check and Alter grades"
-	print "  8 - Accumulate Central Grade List"
-	print "  9 - Email grade.txt Files to Students"
-	print "  10 - Upload Grades to Google Docs"
-	print "  11 - Quit"
+	print "  7 - Accumulate Central Grade List"
+	print "  8 - Email grade.txt Files to Students"
+	print "  9 - Upload Grades to Google Docs"
+	print "  10 - Quit"
 	while(1):
 		choice = raw_input("Choose Task: ")
 		try:
@@ -859,10 +730,9 @@ while( 1 ):
 	elif choice == 4 : unzip_submissions()
 	elif choice == 5 : compile_subs( ) 
 	elif choice == 6 : auto_grade()
-	elif choice == 7 : sight_check()
-	elif choice == 8 : generate_grade_list( )
-	elif choice == 9 : email_grades( )
-	elif choice == 10 : upload_grades( )
+	elif choice == 7 : generate_grade_list( )
+	elif choice == 8 : email_grades( )
+	elif choice == 9 : upload_grades( )
 	else :
 		print "Exiting!"
 		exit()
