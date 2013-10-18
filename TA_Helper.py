@@ -237,12 +237,14 @@ def auto_grade():
 						reference = subprocess.check_output(['./'+test], shell=True)
 					except subprocess.CalledProcessError as e:
 						reference = e.output
-					if cmp(submittal.replace(' ',''),reference.replace(' ','') )!= 0:
+					if cmp(submittal.replace(' ','').strip(),reference.replace(' ','').strip() )!= 0:
 						notes.append("Test: "+test)
 						notes.append("Test Failed.")
 						notes.append("Your Code Produced: ")
 						if len(submittal) > 2000:
 							notes.append('(output was garbled or way too long to print)')
+						elif submittal.count('\n') > 100:
+							notes.append('(output had way too many newlines to print)')
 						else:
 							notes.append(submittal)
 						notes.append("Solution Produced: ")
@@ -319,8 +321,9 @@ def compile_subs():
 						compilation = 'There were errors and warnings during compilation:\n'+compilation
 						add_note_to_grade(email[0], compilation, i)
 					i += 1
-				#else:
-					#print "No "+p['fname']+" found for student "+email[0]
+				else:
+					add_note_to_grade(email[0], "No "+p['fname']+" found", i)
+					i += 1
 	return
 
 # Get Assignment Details from input File
