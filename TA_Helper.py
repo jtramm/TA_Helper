@@ -27,7 +27,7 @@ column_name = 'HW1'
 def sight_check():
 
 	if os.path.exists('grading_status.txt'):
-		lines = [line.strip() for line in open('grading_status.txt')]
+		lines = [line.strip('\n') for line in open('grading_status.txt')]
 	else:
 		lines = []
 		i = 0
@@ -181,7 +181,7 @@ class Command(object):
 	def run(self, timeout):
 		def target():
 			#print 'Thread started'
-			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 			#output = self.process.stdout.read()
 			self.output = self.process.communicate()[0]
 			#print 'Thread finished'
