@@ -165,5 +165,6 @@ Configuration-----------------------------------------------------------------
 	spreadsheet on google drive, and column_name is the name
 	of the column for this assignment (i.e., HW1, EXAM1, etc).
 	The num_students is required to know how many lines of the
-	spreadsheet to read.
+	spreadsheet to read. column_name is also used for some of the
+	printouts/emails sent to students.
 
