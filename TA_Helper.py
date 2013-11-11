@@ -20,7 +20,7 @@ import threading
 ################################ Configuration  ################################
 num_students = 35 
 spreadsheet_name = 'CSPP51040 Grades'
-column_name = 'HW2'
+column_name = 'HW3'
 ################################################################################
 
 # Automated vim hopper for faster sight checking
