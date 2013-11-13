@@ -18,7 +18,7 @@ import threading
 #from subprocess import CalledProcessError
 
 ################################ Configuration  ################################
-num_students = 35 
+num_students = 34 
 spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW3'
 ################################################################################
@@ -121,7 +121,7 @@ def email_submission_status():
 			message = "I have received your homework submission.\n"
 			update.append(line+"    NOTIFIED")
 		else:
-			message = "I have not received your homework submission yet. As a reminder, it is due today at 5:00 PM, and will not be accepted after that time. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
+			message = "I have not received your homework submission yet. As a reminder, the late due date is on Wednesday at 5:00 PM, and homework will not be accepted after that time. If you have emailed it to me already, please contact me immediately so we can figure out where it went.\n"
 			update.append(line)
 		script = "Subject: "+assignment[0]+" "+column_name+" Submission Status\n"
 		script = script + "To: "+email+"\n\n"
@@ -229,7 +229,7 @@ def auto_grade():
 						# This needs to timeout somehow...
 						run_call = email[0]+'/'+test
 						command = Command(run_call)
-						submittal = command.run(timeout=3)
+						submittal = command.run(timeout=10)
 						#submittal = check_output([email[0]+'/'+test], shell=True)
 					except subprocess.CalledProcessError as e:
 						submittal = e.output
@@ -241,18 +241,18 @@ def auto_grade():
 						notes.append("Test: "+test)
 						notes.append("Test Failed.")
 						notes.append("Your Code Produced: ")
-						if len(submittal) > 2000:
+						if len(submittal) > 10000:
 							notes.append('(output was garbled or way too long to print)')
-						elif submittal.count('\n') > 100:
+						elif submittal.count('\n') > 1000:
 							notes.append('(output had way too many newlines to print)')
 						else:
 							notes.append(submittal)
 						notes.append("Solution Produced: ")
 						notes.append(reference)
 						if grade == problem['value']:
-							grade = (3* problem['value']) / 4
-						elif grade == (3* problem['value']) / 4:
 							grade = problem['value'] / 2
+						elif grade == problem['value'] / 2:
+							grade = problem['value'] / 4
 					else:
 						notes.append("Test: "+test)
 						notes.append("Test Passed!\n")
@@ -314,7 +314,14 @@ def compile_subs():
 					if os.path.exists(email[0]+'/p'+str(i)):
 						subprocess.call(['rm','-rf',email[0]+'/p'+str(i)])
 					try:
-						compilation = subprocess.check_output(['gcc','-Wall','-ansi', '-pedantic', '-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']], stderr=subprocess.STDOUT)
+						if i == 2:
+							compilation = subprocess.check_output(['gcc','-Wall','-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname'], 'solutions/p2/p2_test.c', '-lm'], stderr=subprocess.STDOUT)
+						elif i == 3:
+							compilation = subprocess.check_output(['gcc','-Wall','-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname'], 'solutions/p3/p3_test.c', '-lm'], stderr=subprocess.STDOUT)
+						elif i == 4:
+							compilation = subprocess.check_output(['gcc','-Wall','-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname'], 'solutions/p4/p4_test.c', '-lm'], stderr=subprocess.STDOUT)
+						else:
+							compilation = subprocess.check_output(['gcc','-Wall','-o', email[0]+'/p'+str(i), email[0]+'/'+p['fname']], stderr=subprocess.STDOUT)
 					except subprocess.CalledProcessError as e:
 						compilation = e.output
 					if compilation != '':
@@ -661,7 +668,8 @@ def download_emails():
 			filename = part.get_filename()
 			if not(filename):
 				print "ERROR - QUitting"
-				exit(1)
+				continue
+				#exit(1)
 
 			# New checks against students
 			found = 0
