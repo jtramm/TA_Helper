@@ -11,6 +11,7 @@ import fileinput
 import random
 import subprocess
 import threading
+import difflib
 #import tempfile
 #from subprocess import call
 #from subprocess import check_call
@@ -202,6 +203,112 @@ class Command(object):
 # Auto-Grade
 # Need to have some allowance for differences in whitespace I think....
 def auto_grade():
+	confirm = raw_input("Execute Auto-Grade (y/n)? ")
+	if confirm != 'y':
+		return
+	all_students = raw_input("Grade all Students, or just some (all/some)? ")
+	if all_students != 'all' and all_students != 'some':
+		return
+	nproblems = assignment[3]
+	problems = assignment[4]
+	congrats = [line.strip() for line in open('congrats.txt','r')]
+	for name, email in students:
+		if all_students == 'some':
+			grade_student = raw_input("Grade student: "+name+"? (y/n): ")
+			if grade_student != 'y':
+				print "Skipping student: "+name
+				continue
+		print "Grading student: "+name
+		results = []
+		grades = []
+		for problem in problems:
+			grade = problem['value']
+			if os.path.exists(email[0]+'/'+problem['fname']):
+				notes = []
+				for test in problem['tests']:
+					try:
+						# This needs to timeout somehow...
+						run_call = email[0]+'/'+test
+						command = Command(run_call)
+						submittal = command.run(timeout=10)
+						#submittal = check_output([email[0]+'/'+test], shell=True)
+					except subprocess.CalledProcessError as e:
+						submittal = e.output
+					try:
+						reference = subprocess.check_output(['./'+test], shell=True)
+					except subprocess.CalledProcessError as e:
+						reference = e.output
+					if cmp(submittal.replace(' ','').strip(),reference.replace(' ','').strip() )!= 0:
+						notes.append("Test: "+test)
+						notes.append("Test Failed.")
+						notes.append("Diff between your output and the expected output:")
+
+						submittal_lines = submittal.splitlines(1)
+						sublines = []
+						for slines in submittal_lines:
+							sublines.append(slines.strip())
+						
+						reference_lines = reference.splitlines(1)
+						reflines = []
+						for slines in reference_lines:
+							reflines.append(slines.strip())
+
+						for dline in difflib.context_diff(sublines, reflines, fromfile='Your output', tofile='Expected Output'):
+							notes.append(dline)
+						if grade == problem['value']:
+							grade = problem['value'] / 2
+						elif grade == problem['value'] / 2:
+							grade = problem['value'] / 4
+					else:
+						notes.append("Test: "+test)
+						notes.append("Test Passed!\n")
+				results.append(notes)
+			else:
+				results.append(["Not Submitted"])
+				grade = 0
+			
+			grades.append(grade)
+		
+		update = []
+		a = 0
+		if os.path.exists(email[0]+'/grade.txt'):
+			lines = [line.strip() for line in open(email[0]+'/grade.txt','r')]
+			was_grade = 0
+			for line in lines:
+				is_grade = 0
+				if line.startswith("Grade:"):
+					tokens = line.split('/')
+					tokens.insert(1,' /')
+					tokens.insert(1,str(sum(grades)))
+					tokens = ''.join(tokens)
+					update.append(tokens)
+					is_grade = 1
+				for i in range(1, nproblems+1):
+					if line.startswith('Problem '+str(i)+":"):
+						tokens = line.split('/')
+						tokens.insert(1,' /')
+						tokens.insert(1,str(grades[i-1]))
+						tokens = ''.join(tokens)
+						update.append(tokens)
+						is_grade = 1
+						was_grade = 1
+				if is_grade == 0:
+					update.append(line)
+					if was_grade == 1:
+						for note in results[a]:
+							update.append(note)
+						if grades[a] == problems[a]['value']:
+							update.append( '\n'+random.choice(congrats)+'\n' )
+						a += 1
+					was_grade = 0
+		f = open(email[0]+"/grade.txt", 'w')
+		for line in update:
+			f.write(line+'\n')
+		f.close()
+		
+
+# OLD AUTO GRADER
+def no_diff_auto_grade():
 	confirm = raw_input("Execute Auto-Grade (y/n)? ")
 	if confirm != 'y':
 		return
