@@ -241,7 +241,6 @@ def auto_grade():
 					if cmp(submittal.replace(' ','').strip(),reference.replace(' ','').strip() )!= 0:
 						notes.append("Test: "+test)
 						notes.append("Test Failed.")
-						notes.append("Diff between your output and the expected output:")
 
 						submittal_lines = submittal.splitlines(1)
 						sublines = []
@@ -253,8 +252,37 @@ def auto_grade():
 						for slines in reference_lines:
 							reflines.append(slines.strip())
 
+						differences = []
 						for dline in difflib.context_diff(sublines, reflines, fromfile='Your output', tofile='Expected Output'):
-							notes.append(dline)
+							differences.append(dline)
+						if len(differences) > 150:
+							notes.append("=====================================================================")
+							notes.append("Full output from your code")
+							notes.append("=====================================================================")
+							notes.append(submittal)
+							notes.append("=====================================================================")
+							notes.append("Expected full output from solution code")
+							notes.append("=====================================================================")
+							notes.append(reference)
+						elif len(differences) > 50:
+							notes.append("=====================================================================")
+							notes.append("Diff between your output and the expected output")
+							notes.append("=====================================================================")
+							notes = notes + differences
+							notes.append("=====================================================================")
+							notes.append("Full output from your code")
+							notes.append("=====================================================================")
+							notes.append(submittal)
+							notes.append("=====================================================================")
+							notes.append("Expected full output from solution code")
+							notes.append("=====================================================================")
+							notes.append(reference)
+						else:
+							notes.append("=====================================================================")
+							notes.append("Diff between your output and the expected output:")
+							notes.append("=====================================================================")
+							notes = notes + differences
+
 						if grade == problem['value']:
 							grade = problem['value'] / 2
 						elif grade == problem['value'] / 2:
