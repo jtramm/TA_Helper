@@ -24,6 +24,29 @@ spreadsheet_name = 'CSPP51040 Grades'
 column_name = 'HW3'
 ################################################################################
 
+def retab_grades():
+	for name, addr in students:
+		update = []
+		grades = []
+		if os.path.exists(addr[0]+'/grade.txt'):
+			lines = [line.strip() for line in open(addr[0]+'/grade.txt','r')]
+			for line in lines:
+				if 'Grade:' in line:
+					grades.append(int((line.split('Grade:')[1]).split('/')[0].strip()))
+			grades.pop(0)
+			total = sum(grades)
+			print total
+			
+			f = open(addr[0]+"/grade.txt", 'w')
+			top = 0
+			for line in lines:
+				if 'Grade:' in line and top == 0:
+					f.write('Grade:  '+str(total)+' / 100\n')
+					top = 1
+				else:
+					f.write(line+'\n')
+			f.close()
+
 # Automated vim hopper for faster sight checking
 def sight_check():
 
@@ -181,11 +204,8 @@ class Command(object):
 
 	def run(self, timeout):
 		def target():
-			#print 'Thread started'
 			self.process = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-			#output = self.process.stdout.read()
 			self.output = self.process.communicate()[0]
-			#print 'Thread finished'
 
 		thread = threading.Thread(target=target)
 		thread.start()
@@ -195,9 +215,13 @@ class Command(object):
 			print 'Terminating process'
 			self.process.terminate()
 			thread.join()
-			return '(Your code never returned anything)'
+			return '(Your code took > 10 seconds to run or froze)'
 
-		return self.output
+		if self.output == '':
+			return 'Segmentation fault: 11'
+
+		else:
+			return self.output
 
 
 # Auto-Grade
@@ -696,6 +720,11 @@ def get_class_list():
 # IMPROVED Generates directory structure and grade.txt files
 def generate_directories():
 
+	choice = raw_input("Are you sure (y/n): ")
+	if choice != 'y':
+		print "OK, we won't do that"
+		return
+
 	classname = assignment[0]
 	atype = assignment[1]
 	anumber = assignment[2]
@@ -981,7 +1010,8 @@ def get_task_choice():
 	print "  8 - Accumulate Central Grade List"
 	print "  9 - Email grade.txt Files to Students"
 	print "  10 - Upload Grades to Google Docs"
-	print "  11 - Quit"
+	print "  11 - Retabulate Grades"
+	print "  12 - Quit"
 	while(1):
 		choice = raw_input("Choose Task: ")
 		try:
@@ -1009,6 +1039,7 @@ while( 1 ):
 	elif choice == 8 : generate_grade_list( )
 	elif choice == 9 : email_grades( )
 	elif choice == 10 : upload_grades( )
+	elif choice == 11 : retab_grades( )
 	else :
 		print "Exiting!"
 		exit()
